@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nova Concept Store</title>
+    <link rel="stylesheet" href="Esteticos/estilos_dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+       
+        <aside class="sidebar">            
+            <div class="logo-container">
+                <img src="Esteticos/logo.png" alt="Logo Nova">
+            </div>
+            <div class="user-profile">
+<div class="avatar" id="letra-avatar">U</div>
+    <div class="user-info">
+        <p class="user-name" id="nombre-perfil">Cargando...</p>
+        <p class="user-role">Cargando...</p>
+    </div>
+</div>
+            <nav class="nav-menu">
+                <a href="ventas/Ventas.html" class="nav-item">
+                    <span class="icon">💰 Ventas</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="icon">📦 Inventarios</span>
+                </a>
+                <a href="Emprendedores/Emprendedores.html" class="nav-item">
+                    <span class="icon">🚀 Emprendedores</span>
+                </a>
+                <a href="Usuario/Usuarios.html" class="nav-item">
+                    <span class="icon">👤 Usuarios</span>
+                </a>
+                <a href="especiales/Pedidos_especiales.html" class="nav-item">
+                    <span class="icon">📦 Pedidos especiales</span>
+                </a>
+            </nav>
+   <div class="logout-container">
+                <a href="index.html" class="btn-logout" style="text-decoration: none;">
+                    <span class="icon">🚪 Salir</span> 
+                </a>
+            </div>
+        </aside>
+        <main class="main-content">
+
+            <section class="content-card">
+                <h1>Bienvenido </h1>
+                <p>Selecciona una opción del menú lateral para comenzar.</p>
+            </section>
+        </main>
+    </div>
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+  
+            const nombreGuardado = localStorage.getItem("usuarioLogueado");
+            const etiquetaNombre = document.getElementById("nombre-perfil");
+            const etiquetaAvatar = document.getElementById("letra-avatar"); 
+
+            if (nombreGuardado && nombreGuardado.trim() !== "") {
+
+                if (etiquetaNombre) {
+                    etiquetaNombre.textContent = nombreGuardado;
+                }
+                if (etiquetaAvatar) {
+                    etiquetaAvatar.textContent = nombreGuardado.charAt(0).toUpperCase();
+                }
+            } else {
+                if (etiquetaNombre) {
+                    etiquetaNombre.textContent = "Usuario Desconocido";
+                }
+                if (etiquetaAvatar) {
+                    etiquetaAvatar.textContent = "U";
+                }
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+    // Recuperamos los datos que guardamos en el login
+    const nombre = localStorage.getItem("usuarioLogueado");
+    const cargo = localStorage.getItem("cargoUsuario");
+
+    // Seleccionamos los elementos de la interfaz
+    const elementoNombre = document.getElementById("nombre-perfil");
+    const elementoCargo = document.querySelector(".user-role");
+    const linkVentas = document.querySelector('a[href="ventas.html"]');
+
+    // 1. Plasmamos la información
+    if (elementoNombre) elementoNombre.textContent = nombre || "Invitado";
+    if (elementoCargo) elementoCargo.textContent = (cargo || "SIN CARGO").toUpperCase();
+
+    // 2. Restricción para el cargo "Vendedor"
+    if (cargo === "Vendedor") {
+        if (linkVentas) {
+            linkVentas.style.opacity = "0.5";
+            linkVentas.style.pointerEvents = "none"; // Bloquea el clic
+            linkVentas.title = "No tienes permisos para acceder a Ventas";
+        }      
+        // Si intenta entrar por URL directa a ventas.html, lo regresamos
+        if (window.location.pathname.includes("ventas.html")) {
+            alert("Acceso restringido para vendedores.");
+            window.location.href = "dashboard.html";
+        }
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const cargo = localStorage.getItem("cargoUsuario");
+    const nombre = localStorage.getItem("usuarioLogueado");
+
+    // Mostrar info en perfil
+    document.getElementById("nombre-perfil").textContent = nombre;
+    document.querySelector(".user-role").textContent = cargo.toUpperCase();
+    
+    // Si es Vendedor, ocultamos TODOS los accesos del menú
+    if (cargo === "Vendedor") {
+        const itemsMenu = document.querySelectorAll('.nav-item');
+        itemsMenu.forEach(item => {
+            // Permitimos que vea el Dashboard (inicio), pero nada más
+            if (!item.href.includes("dashboard.html")) {
+                item.style.display = "none";
+            }
+        });       
+        // Mensaje de bienvenida limitado
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <div class="content-card">
+                    <h2>Bienvenida, ${nombre}</h2>
+                    <p>Tu cargo actual es <b>${cargo}</b>. No tienes permisos para acceder a los módulos de gestión.</p>
+                </div>`;
+        }
+    }
+});
+    </script>
+</body>
+</html>

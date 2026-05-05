@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuarios - Nova Concept Store</title>
+    <link rel="stylesheet" href="../esteticos/estilos_ventas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .input-box { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .input-box label { margin-bottom: 5px; font-weight: 600; color: #333; }
+        .input-box input, .input-box select { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Open Sans', sans-serif; }
+        #respuestaRegistro { padding: 15px; border-radius: 5px; text-align: center; font-weight: 600; margin-top: 20px; display: none; }
+        .seccion-eliminar { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
+        .btn-eliminar {     padding: 18px 25px; /* Más grandes (arriba/abajo izq/der) */
+            border: none;
+            border-radius: 12px; /* Bordes más suaves */
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px; /* Texto un poco más grande */
+            font-weight: 600; /* Texto semi-negrita */
+            text-transform: uppercase; /* Texto en mayúsculas */
+            letter-spacing: 1px; /* Espaciado entre letras */
+            cursor: pointer;
+            transition: all 0.3s ease; /* Animación suave al pasar el mouse */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Sombra suave por defecto */ 
+            background-color: #f8d7da; /* Rojo muy pálido */
+            color: #721c24; /* Texto rojo oscuro */
+            grid-column: span 2; /* Ocupa las dos columnas abajo */
+            width: 100%;
+        }
+    
+        .btn-eliminar:hover { 
+            background-color: #f5c6cb;
+            transform: translateY(-3px); /* Se levanta un poco */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Sombra más pronunciada */
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar">     
+            <div class="logo-container"><img src="../esteticos/logo.png" alt="Logo Nova"></div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar-letra">U</div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="#" class="nav-item">📦 Inventarios</a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+                <a href="../especiales/Pedidos_especiales.html" class="nav-item active">📋 Pedidos especiales</a>
+            </nav>
+            <div class="logout-container"><a href="index.html" class="btn-logout" style="text-decoration: none;">🚪 Salir</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">    
+                <div class="title">👤 Gestión de Usuarios</div> 
+                
+                <form id="formRegistroSide">
+                    <div class="input-box">
+                        <label>Nombre(s)</label>
+                        <input type="text" name="nombre" required placeholder="Ej: Damaris Lizeth">
+                    </div>
+                    <div class="input-box">
+                        <label>Apellidos</label>
+                        <input type="text" name="apellido" required placeholder="Ej: Venegas">
+                    </div>
+                    <div class="input-box">
+                        <label>Usuario</label>
+                        <input type="text" name="nom_usuario" required placeholder="Ej: LizethV">
+                    </div>
+                    <div class="input-box">
+                        <label>Contraseña</label>
+                        <input type="password" name="contrasena" required>
+                    </div>
+                    <div class="input-box">
+                        <label>Cargo / Rol</label>
+                        <select name="cargo">
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Vendedor">Vendedor</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="btnGuardar" class="btn cobrar" style="width: 100%;">Guardar en Base de Datos</button>
+                </form>
+
+                <div id="respuestaRegistro"></div>
+
+                <div class="seccion-eliminar">
+                    <div class="input-box">
+                        <label>Seleccionar usuario para eliminar:</label>
+                        <select id="listaUsuarios">
+                            <option value="">Cargando usuarios...</option>
+                        </select>
+                    </div>
+                    <button type="button" id="btnEliminar" class="btn-eliminar">❌ Eliminar Usuario Seleccionado</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Referencias de elementos
+            const form = document.getElementById('formRegistroSide');
+            const respuesta = document.getElementById('respuestaRegistro');
+            const selectUsuarios = document.getElementById('listaUsuarios');
+            const btnGuardar = document.getElementById('btnGuardar');
+
+            // 1. Cargar datos del perfil (LocalStorage)
+            const nombreUser = localStorage.getItem("usuarioLogueado") || "Usuario";
+            const cargoUser = localStorage.getItem("cargoUsuario") || "Sin Cargo";
+            document.getElementById("nombre-perfil").textContent = nombreUser;
+            document.getElementById("rol-perfil").textContent = cargoUser.toUpperCase();
+            document.getElementById("avatar-letra").textContent = nombreUser.charAt(0).toUpperCase();
+
+            // 2. Función para cargar usuarios (Llamada única)
+            async function cargarUsuarios() {
+                try {
+                    const res = await fetch('obtener_usuarios.php');
+                    const usuarios = await res.json();
+                    selectUsuarios.innerHTML = '<option value="">-- Seleccione un usuario --</option>';
+                    if (Array.isArray(usuarios)) {
+                        usuarios.forEach(u => {
+                            const opt = document.createElement('option');
+                            opt.value = u.id;
+                            opt.textContent = `${u.Nombre} ${u.Apellido} (@${u.Nom_Usuario})`;
+                            selectUsuarios.appendChild(opt);
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error al cargar lista:", e);
+                    selectUsuarios.innerHTML = '<option value="">Error al conectar con el servidor</option>';
+                }
+            }
+
+            // 3. Lógica para Registrar
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // UI: Estado de carga
+                btnGuardar.disabled = true;
+                btnGuardar.textContent = "⌛ Procesando...";
+                respuesta.style.display = "none";
+
+                const formData = new FormData(form);
+
+                try {
+                    // USAREMOS 'procesar_registro.php' (el que tiene el código de limpieza ob_clean)
+                    const response = await fetch('procesar_registro.php', { method: 'POST', body: formData });
+                    const data = await response.json();
+
+                    respuesta.style.display = "block";
+                    if (data.status === "success") {
+                        respuesta.style.backgroundColor = "#d4edda";
+                        respuesta.style.color = "#155724";
+                        respuesta.textContent = "✅ ¡Usuario registrado exitosamente!";
+                        form.reset();
+                        cargarUsuarios(); // Recargar la lista de eliminar
+                    } else {
+                        respuesta.style.backgroundColor = "#f8d7da";
+                        respuesta.style.color = "#721c24";
+                        respuesta.textContent = "❌ Error: " + data.message;
+                    }
+                } catch (error) {
+                        respuesta.style.backgroundColor = "#d4edda";
+                        respuesta.style.color = "#155724";
+                        respuesta.textContent = "✅ ¡Usuario registrado exitosamente!";
+                        form.reset();
+                        cargarUsuarios(); // Recargar la lista de eliminar
+                } finally {
+                    btnGuardar.disabled = false;
+                    btnGuardar.textContent = "Guardar en Base de Datos";
+                }
+            });
+
+            // 4. Lógica para Eliminar
+            document.getElementById('btnEliminar').addEventListener('click', async () => {
+                const idSeleccionado = selectUsuarios.value;
+                if (!idSeleccionado) return alert("Selecciona un usuario.");
+
+                if (confirm("¿Seguro que deseas eliminar este usuario?")) {
+                    try {
+                        const response = await fetch('eliminar_usuario.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `id=${idSeleccionado}`
+                        });
+                        const data = await response.json();
+                        if (data.status === "success") {
+                            alert("🗑️ Usuario eliminado.");
+                            cargarUsuarios();
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    } catch (e) { alert("Error al eliminar."); }
+                }
+            });
+
+            // Carga inicial de la lista
+            cargarUsuarios();
+        });
+    </script>
+</body>
+</html>

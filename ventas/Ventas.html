@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nova Concept Store</title>
+    <link rel="stylesheet" href="../Esteticos/estilos_ventas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center; 
+            align-items: center; z-index: 1000; backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .form-apartado { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .form-apartado input { padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .apartado-item {
+            border-bottom: 1px solid #eee; padding: 12px 5px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .apartado-item small { color: #666; display: block; }
+        #lista-apartados-db { margin-top: 15px; }
+        .btn-cargar { background: #3498db; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar">     
+            <div class="logo-container">
+                <img src="../Esteticos/logo.png" alt="Logo Nova">
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar">D</div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role">SUPERADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="../Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="#" class="nav-item">📦 Inventarios</a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+                <a href="../especiales/Pedidos_especiales.html" class="nav-item">📦 Pedidos especiales</a>
+            </nav>
+
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" style="text-decoration: none;">🚪 Salir</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">    
+                <div class="title">🛒 Carrito de Compras</div> 
+                <div id="carrito-lista"></div>
+
+                <div class="resumen-compra">
+                    <p>Subtotal: $<span id="subtotal">0</span></p>
+                    <label>Descuento:</label>
+                    <input type="number" id="descuento" value="0" min="0" oninput="actualizarTotales()">
+                    <p class="total">Total: $<span id="total">0</span></p>
+                    <label>Con cuánto paga:</label>
+                    <input type="number" id="pago" min="0" oninput="calcularCambio()">
+                    <p>Cambio: $<span id="cambio">0</span></p>
+
+                    <div class="grupo-botones">
+                        <button class="btn cobrar">COBRAR</button>
+                        <button class="btn apartado">APARTADO</button>
+                        <button class="btn borrar" onclick="vaciarCarrito()">BORRAR</button>
+                        <button class="btn volver" onclick="window.location.href='../privera_vista.html'">VOLVER</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">    
+                <div class="title">Seleccionar Emprendedor</div>
+                <div class="entrepreneur">
+                    <div class="entrepreneur-container">
+                        <div class="entrepreneur-item" onclick="toggleMenu('menu-liz')">Liz</div>
+                        <div class="submenu" id="menu-liz">
+                            <p onclick="agregarAlCarrito('Producto 1 Liz', 100)">Producto 1 - $100</p>
+                            <p onclick="agregarAlCarrito('Producto 2 Liz', 150)">Producto 2 - $150</p>
+                            <p onclick="agregarAlCarrito('Producto 3 Liz', 200)">Producto 3 - $200</p>
+                        </div>
+                    </div>
+                    <div class="entrepreneur-container">
+                        <div class="entrepreneur-item" onclick="toggleMenu('menu-daichi')">Daichi</div>
+                        <div class="submenu" id="menu-daichi">
+                            <p onclick="agregarAlCarrito('Artículo A Daichi', 80)">Artículo A - $80</p>
+                            <p onclick="agregarAlCarrito('Artículo B Daichi', 120)">Artículo B - $120</p>
+                            <p onclick="agregarAlCarrito('Artículo C Daichi', 60)">Artículo C - $60</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-apartados" class="modal-overlay">
+        <div class="modal-content">
+            <div class="title">📋 Gestión de Apartados</div>
+            <div class="form-apartado">
+                <label>Registrar nuevo apartado:</label>
+                <input type="text" id="nombre-cliente" placeholder="Nombre del cliente">
+                <button class="btn cobrar" style="width: 100%;" onclick="guardarApartado()">GUARDAR PRODUCTOS ACTUALES</button>
+            </div>
+            <hr>
+            <h3>Apartados Pendientes</h3>
+            <div id="lista-apartados-db"></div>
+            <button class="btn volver" style="margin-top: 20px; width: 100%;" onclick="cerrarModal()">CERRAR VENTANA</button>
+        </div>
+    </div>
+
+    <script>
+        let carrito = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const cargo = localStorage.getItem("cargoUsuario") || "SUPERADMIN";
+            const nombre = localStorage.getItem("usuarioLogueado") || "Usuario";
+            document.getElementById("nombre-perfil").textContent = nombre;
+            document.querySelector(".user-role").textContent = cargo.toUpperCase();
+
+            if (cargo === "Vendedor") {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (!item.href.includes("Ventas.html")) item.style.display = "none";
+                });
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = `<div class="content-card"><h2>Bienvenida, ${nombre}</h2><p>Tu cargo es <b>${cargo}</b>. Sin permisos de gestión.</p></div>`;
+                }
+            }
+        });
+
+        function toggleMenu(menuId) {
+            document.querySelectorAll('.submenu').forEach(menu => {
+                if (menu.id !== menuId) menu.style.display = 'none';
+            });
+            const selected = document.getElementById(menuId);
+            selected.style.display = (selected.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function agregarAlCarrito(nombre, precio) {
+            carrito.push({ nombre, precio });
+            mostrarCarrito();
+        }
+
+        function eliminarDelCarrito(index) {
+            carrito.splice(index, 1);
+            mostrarCarrito();
+        }
+
+        function mostrarCarrito() {
+            const contenedor = document.getElementById("carrito-lista");
+            contenedor.innerHTML = "";
+            carrito.forEach((item, index) => {
+                const div = document.createElement("div");
+                div.className = "item-carrito";
+                div.innerHTML = `<span>${item.nombre} - $${item.precio}</span><button onclick="eliminarDelCarrito(${index})">❌</button>`;
+                contenedor.appendChild(div);
+            });
+            actualizarTotales();
+        }
+
+        function actualizarTotales() {
+            let subtotal = carrito.reduce((acc, item) => acc + item.precio, 0);
+            let descuento = parseFloat(document.getElementById("descuento").value) || 0;
+            let total = Math.max(0, subtotal - descuento);
+            document.getElementById("subtotal").textContent = subtotal;
+            document.getElementById("total").textContent = total;
+            calcularCambio();
+        }
+
+        function calcularCambio() {
+            let total = parseFloat(document.getElementById("total").textContent) || 0;
+            let pago = parseFloat(document.getElementById("pago").value) || 0;
+            document.getElementById("cambio").textContent = Math.max(0, pago - total);
+        }
+
+        function vaciarCarrito() {
+            carrito = [];
+            document.getElementById("pago").value = "";
+            document.getElementById("descuento").value = "0";
+            mostrarCarrito();
+        }
+
+        // FETCH: Rutas directas asumiendo que los PHP están en la misma carpeta /ventas
+        document.querySelector('.cobrar').addEventListener('click', async function() {
+            if (carrito.length === 0) return alert("El carrito está vacío");
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = "⌛ Procesando...";
+
+            const datosVenta = {
+                productos: carrito,
+                total: parseFloat(document.getElementById("total").textContent),
+                descuento: parseFloat(document.getElementById("descuento").value) || 0
+            };
+
+            try {
+                const response = await fetch('registrar_venta.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosVenta)
+                });
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    btn.style.backgroundColor = "#28a745";
+                    btn.innerHTML = "✅ VENTA EXITOSA";
+                    setTimeout(() => { vaciarCarrito(); location.reload(); }, 1000);
+                } else {
+                    alert("Error: " + data.message);
+                    btn.disabled = false; btn.innerHTML = "COBRAR";
+                }
+            } catch (err) {
+                alert("Error de comunicación. Verifica que registrar_venta.php esté en la carpeta /ventas");
+                btn.disabled = false; btn.innerHTML = "COBRAR";
+            }
+        });
+
+        document.querySelector('.apartado').onclick = () => {
+            document.getElementById('modal-apartados').style.display = 'flex';
+            cargarApartados();
+        };
+
+        function cerrarModal() { document.getElementById('modal-apartados').style.display = 'none'; }
+
+        async function guardarApartado() {
+            const cliente = document.getElementById('nombre-cliente').value;
+            if (!cliente || carrito.length === 0) return alert("Faltan datos.");
+            try {
+                const res = await fetch('manejar_apartados.php?accion=guardar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cliente, productos: carrito })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert("¡Apartado guardado!");
+                    vaciarCarrito();
+                    cargarApartados();
+                }
+            } catch (e) { alert("Error al guardar."); }
+        }
+
+        async function cargarApartados() {
+            try {
+                const res = await fetch('manejar_apartados.php?accion=leer');
+                const data = await res.json();
+                const contenedor = document.getElementById('lista-apartados-db');
+                contenedor.innerHTML = data.length === 0 ? "<p>No hay apartados.</p>" : "";
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'apartado-item';
+                    div.innerHTML = `<div><strong>${item.cliente}</strong><br><small>${item.producto} - $${item.precio}</small></div>
+                                     <button class="btn-cargar" onclick="pasarAlCarrito('${item.producto}', ${item.precio}, ${item.id})">🛒 Cargar</button>`;
+                    contenedor.appendChild(div);
+                });
+            } catch (e) { console.error("Error"); }
+        }
+
+        async function pasarAlCarrito(nombre, precio, id) {
+            agregarAlCarrito(nombre, precio);
+            await fetch('manejar_apartados.php?accion=borrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            cargarApartados();
+        }
+    </script>
+</body>
+</html>

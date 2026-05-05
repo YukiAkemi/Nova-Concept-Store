@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Emprendedores - Nova Concept Store</title>
+    <link rel="stylesheet" href="../Esteticos/estilos_dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .content-card {
+            justify-content: flex-start !important;
+            align-items: stretch !important;
+            padding: 40px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f2d8df;
+            padding-bottom: 10px;
+        }
+        .input-box { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .input-box label { margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px; }
+        .input-box input, .input-box select { 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #ebd4db; 
+            background-color: #fdfafb;
+        }
+        .btn-registrar {
+            background-color: #d6adba;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-registrar:hover { background-color: #c599a8; }
+        #respuestaRegistro { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border-radius: 8px; 
+            display: none; 
+            font-size: 14px;
+        }
+        .seccion-eliminar { 
+            margin-top: 40px; 
+            padding-top: 20px; 
+            border-top: 2px dashed #f2d8df; 
+        }
+        .btn-eliminar {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 12px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar">     
+            <div class="logo-container">
+                <img src="../Esteticos/logo.png" alt="Logo Nova">
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar" id="avatar-letra">U</div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="#" class="nav-item">📦 Inventarios</a>
+                <a href="Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+                <a href="../especiales/Pedidos_especiales.html" class="nav-item">📦 Pedidos especiales</a>
+            </nav>
+
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" style="text-decoration: none;">🚪 Salir</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">    
+                <div class="title">🚀 Gestión de Emprendedores</div> 
+                
+                <form id="formRegistroEmprendedor" enctype="multipart/form-data">
+                    <div class="input-box">
+                        <label>Nombre de la Marca / Emprendedor</label>
+                        <input type="text" name="nombre_marca" required placeholder="Ej: Artesanías Luna">
+                    </div>
+                    <div class="input-box">
+                        <label>Nombre del Responsable</label>
+                        <input type="text" name="nombre_responsable" required placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="input-box">
+                        <label>Teléfono de Contacto</label>
+                        <input type="tel" name="telefono" required placeholder="Ej: 6141234567">
+                    </div>
+                    <div class="input-box">
+                        <label>Categoría</label>
+                        <select name="categoria">
+                            <option value="Joyería">Joyería</option>
+                            <option value="Ropa">Ropa</option>
+                            <option value="Cuidado Personal">Cuidado Personal</option>
+                            <option value="Decoración">Decoración</option>
+                            <option value="Alimentos">Alimentos</option>
+                        </select>
+                    </div>
+                    <div class="input-box">
+                        <label>Foto o Logo del Emprendedor</label>
+                        <input type="file" name="foto" accept="image/*">
+                    </div>
+                    <button type="submit" id="btnGuardar" class="btn-registrar">Registrar Emprendedor</button>
+                </form>
+
+                <div id="respuestaRegistro"></div>
+
+                <div class="seccion-eliminar">
+                    <div class="title" style="font-size: 18px; border: none; margin-bottom: 10px;">🗑️ Eliminar Registro</div>
+                    <div class="input-box">
+                        <select id="listaEmprendedores">
+                            <option value="">Cargando emprendedores...</option>
+                        </select>
+                    </div>
+                    <button type="button" id="btnEliminar" class="btn-eliminar">❌ Eliminar Seleccionado</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Manejo del registro con imagen
+        document.getElementById('formRegistroEmprendedor').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this); // Captura automáticamente texto y archivos
+            const respuestaDiv = document.getElementById('respuestaRegistro');
+
+            fetch('procesar_registro_emprendedor.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                respuestaDiv.style.display = 'block';
+                respuestaDiv.textContent = data.message;
+                
+                if (data.status === 'success') {
+                    respuestaDiv.style.backgroundColor = '#d4edda';
+                    respuestaDiv.style.color = '#155724';
+                    this.reset();
+                    // Aquí podrías recargar la lista de emprendedores si tienes la función
+                } else {
+                    respuestaDiv.style.backgroundColor = '#f8d7da';
+                    respuestaDiv.style.color = '#721c24';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        };
+    </script>
+</body>
+</html>
