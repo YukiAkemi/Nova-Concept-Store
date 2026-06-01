@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nova Concept Store</title>
+    <link rel="stylesheet" href="Esteticos/estilos_dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS CONTROLADORES PARA EL AVATAR EN CÍRCULO --- */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden; /* Corta cualquier excedente de fotos grandes */
+        }
+
+        /* Reajusta y encuadra la foto del usuario de forma inteligente */
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Evita que la imagen se estire o deforme */
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container"> 
+        <aside class="sidebar">            
+            <div class="logo-container">
+                <img src="Esteticos/logo.png" alt="Logo Nova">
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                    <p class="user-name" id="nombre-perfil">Cargando...</p>
+                    <p class="user-role">Cargando...</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="ventas/Ventas.html" class="nav-item">
+                    <span class="icon">💰 Ventas</span>
+                </a>
+                <a href="../ver ventas/ver_ventas.html" class="nav-item">
+                    <span class="icon">📋 Historial de Ventas</span>
+                </a>
+                <a href="Inventarios/inventarios.html" class="nav-item">
+                    <span class="icon">📦 Inventarios</span>
+                </a>
+                <a href="Emprendedores/Emprendedores.html" class="nav-item">
+                    <span class="icon">🚀 Emprendedores</span>
+                </a>
+                <a href="Usuario/Usuarios.html" class="nav-item">
+                    <span class="icon">👤 Usuarios</span>
+                </a>
+
+            </nav>
+            
+            <div class="logout-container">
+                <a href="index.html" class="btn-logout" style="text-decoration: none;" onclick="localStorage.clear();">
+                    <span class="icon">🚪 Salir</span> 
+                </a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <section class="content-card" id="contenedor-bienvenida">
+                <h1>Bienvenido</h1>
+                <p>Selecciona una opción del menú lateral para comenzar.</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Extraer del almacenamiento local los datos guardados en el login
+            const nombreCompleto = localStorage.getItem("usuarioLogueado");
+            const cargo = localStorage.getItem("cargoUsuario");
+            
+
+            // 2. Capturar elementos del DOM
+            const etiquetaNombre = document.getElementById("nombre-perfil");
+            const etiquetaCargo = document.querySelector(".user-role");
+            const avatarContenedor = document.getElementById("avatar-contenedor");
+            const contenedorBienvenida = document.getElementById("contenedor-bienvenida");
+
+            // Redirección de seguridad: Si no hay datos, mandarlo de vuelta al Login
+            if (!nombreCompleto || !cargo) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            // 3. Renderizar los datos dinámicamente en el perfil lateral con soporte multiformato
+            if (etiquetaNombre) etiquetaNombre.textContent = nombreCompleto;
+            if (etiquetaCargo) etiquetaCargo.textContent = cargo.toUpperCase();
+            
+            // Cadena secuencial: busca .jpg -> .png -> .webp -> .gif -> .jpeg -> Inicial si falla todo
+            if (nombreCompleto && nombreCompleto.trim() !== "") {
+                avatarContenedor.innerHTML = `
+                    <img src="Usuario/foto/${nombreCompleto}.jpg" 
+                         onerror="this.src='Usuario/foto/${nombreCompleto}.png'; 
+                                  this.onerror=function(){ this.src='Usuario/foto/${nombreCompleto}.webp'; 
+                                  this.onerror=function(){ this.src='Usuario/foto/${nombreCompleto}.gif'; 
+                                  this.onerror=function(){ this.src='Usuario/foto/${nombreCompleto}.jpeg'; 
+                                  this.onerror=function(){ this.parentElement.innerHTML='${nombreCompleto.charAt(0).toUpperCase()}'; }; }; }; };" 
+                         alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            // 4. Lógica de control de accesos por Roles
+            if (cargo === "Vendedor") {
+                // Ocultar todas las opciones de gestión del menú lateral
+                const itemsMenu = document.querySelectorAll('.nav-item');
+                itemsMenu.forEach(item => {
+                    item.style.display = "none";
+                });       
+                
+                // Sobrescribir el panel central con restricciones para el vendedor
+                if (contenedorBienvenida) {
+                    contenedorBienvenida.innerHTML = `
+                        <h1>Bienvenido(a), ${nombreCompleto}</h1>
+                        <p style="color: #666;">No cuentas con permisos para acceder a las herramientas de gestión administrativa.</p>
+                    `;
+                }
+            } else if (cargo === "Admin" || cargo === "Super Admin") {
+                // Si es administrador o Super Admin, dejamos el menú intacto y personalizamos su bienvenida
+                if (contenedorBienvenida) {
+                    contenedorBienvenida.querySelector('h1').textContent = `Panel de Administración`;
+                    contenedorBienvenida.querySelector('p').textContent = `Bienvenido, ${nombreCompleto}.`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Concept Store</title>
+    <link rel="stylesheet" href="Esteticos/estilos.css">
+</head>
+<body>
+    <style>
+        .btn-login { 
+            width: 100%; 
+            padding: 10px; 
+            background: #d6adba; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: 600; 
+        }
+
+        .btn-login:hover { 
+            background: #ebd1d9; 
+        }
+
+        .error-msg { 
+            color: red; 
+            font-size: 14px; 
+            margin-top: 10px; 
+            display: none; 
+        }
+
+    </style>
+<div class="login-container">
+    <div class="logo-container">
+        <img src="./Esteticos/logo.png" alt="Logo Nova Concept Store">
+    </div>
+    <form id="loginForm">
+        <div class="form-group">
+            <input type="text" id="usuario" name="usuario" placeholder="Usuario" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" name="password" placeholder="Contraseña" required>
+        </div>
+        <button type="submit" class="btn-login">Ingresar</button>
+        <div id="error" class="error-msg">Usuario o contraseña incorrectos</div>
+    </form>
+</div>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault(); // Evita que la página se recargue
+
+    const formData = new FormData(this);
+
+    // Enviamos los datos al backend de PHP
+    fetch("../Login/login.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // ¡AQUÍ ESTÁ LA CLAVE! Guardamos dinámicamente los datos del usuario que devolvió PHP
+            localStorage.setItem("usuarioLogueado", data.nombre);
+            localStorage.setItem("cargoUsuario", data.rol);
+
+            // Redirigimos al Dashboard
+            window.location.href = "privera_vista.html"; 
+        } else {
+            // Mostrar error si las credenciales no coinciden
+            const errorDiv = document.getElementById("error");
+            errorDiv.style.display = "block";
+            errorDiv.textContent = data.message || "Credenciales incorrectas";
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Hubo un error al procesar la solicitud.");
+    });
+});
+</script>
+
+</body>
+</html>
