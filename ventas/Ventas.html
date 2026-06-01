@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nova Concept Store</title>
+    <link rel="stylesheet" href="../Esteticos/estilos_ventas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS CONTROLADORES PARA EL AVATAR EN CÍRCULO --- */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 18px;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* --- ESTILOS PARA LOS TEXTOS DEL MENÚ --- */
+        .nav-item {
+            font-weight: 700 !important;
+            color: #2b2b2b !important;
+            text-decoration: none;
+        }
+
+        /* --- ESTILOS COMPLEMENTARIOS DEL DASHBOARD --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center; 
+            align-items: center; z-index: 1000; backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .form-apartado { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .form-apartado input { padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .apartado-item {
+            border-bottom: 1px solid #eee; padding: 12px 5px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .apartado-item small { color: #666; display: block; }
+        #lista-apartados-db { margin-top: 15px; }
+        .btn-cargar { background: #3498db; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; }
+        
+        .select-parametro {
+            width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ddd; display: block;
+        }
+        .label-parametro { font-size: 0.9rem; font-weight: 600; color: #333; margin-top: 5px; display: block; }
+        
+        .item-carrito {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px; border-bottom: 1px solid #eee; margin-bottom: 5px;
+        }
+
+        /* --- ESTILOS DINÁMICOS PARA LA LISTA DE EMPRENDEDORES --- */
+        .entrepreneur-container {
+            margin-bottom: 8px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .entrepreneur-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            cursor: pointer;
+            background-color: #fcfcfc;
+            transition: background 0.2s ease;
+            user-select: none;
+        }
+        .entrepreneur-item:hover {
+            background-color: #f5f5f5;
+        }
+        .avatar-emp {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #e5c5cb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .avatar-emp img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .avatar-emp span {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .emp-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+        .submenu {
+            display: none;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
+            padding: 5px 0;
+        }
+        .submenu p {
+            padding: 10px 15px 10px 50px;
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            transition: background 0.15s ease;
+        }
+        .submenu p:hover {
+            background-color: #f0f0f0;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar">     
+            <div class="logo-container">
+                <img src="../Esteticos/logo.png" alt="Logo Nova">
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="../ver ventas/ver_ventas.html" class="nav-item">📋 Historial de Ventas</a>
+                <a href="../Inventarios/inventarios.html" class="nav-item">📦 Inventarios</a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+            </nav>
+
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" style="text-decoration: none;" onclick="localStorage.clear();">🚪 Salir</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">    
+                <div class="title">🛒 Carrito de Compras</div> 
+                <div id="carrito-lista"></div>
+
+                <div class="resumen-compra">
+                    <p>Subtotal: $<span id="subtotal">0</span></p>
+                    <label>Descuento total a la venta ($):</label>
+                    <input type="number" id="descuento" value="0" min="0" oninput="actualizarTotales()">
+                    <p class="total">Total: $<span id="total">0</span></p>
+                    
+                    <label class="label-parametro">Tipo de Pago:</label>
+                    <select id="tipo_pago" class="select-parametro">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+
+                    <label class="label-parametro">Método de Pago:</label>
+                    <select id="metodo_pago" class="select-parametro">
+                        <option value="PUE">Pago en una sola exhibición (PUE)</option>
+                        <option value="PPD">Pago en parcialidades o diferido (PPD)</option>
+                    </select>
+
+                    <label class="label-parametro">Comprobante:</label>
+                    <select id="comprobante" class="select-parametro">
+                        <option value="Ticket">Ticket</option>
+                        <option value="Factura">Factura</option>
+                        <option value="Nota de Venta">Nota de Venta</option>
+                    </select>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+                    <label>Con cuánto paga:</label>
+                    <input type="number" id="pago" min="0" oninput="calcularCambio()">
+                    <p>Cambio: $<span id="cambio">0</span></p>
+
+                    <div class="grupo-botones">
+                        <button class="btn cobrar">COBRAR</button>
+                        <button class="btn apartado">APARTADO</button>
+                        <button class="btn borrar" onclick="vaciarCarrito()">BORRAR</button>
+                        <button class="btn volver" onclick="window.location.href='../privera_vista.html'">VOLVER</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">    
+                <div class="title">Seleccionar Emprendimiento</div>
+                <div class="entrepreneur" id="contenedor-emprendedores">
+                    <p style="padding: 10px; color: #666;">Cargando emprendimientos y productos...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-apartados" class="modal-overlay">
+        <div class="modal-content">
+            <div class="title">📋 Gestión de Apartados</div>
+            <div class="form-apartado">
+                <label>Registrar nuevo apartado:</label>
+                <input type="text" id="nombre-cliente" placeholder="Nombre del cliente">
+                <button class="btn cobrar" style="width: 100%;" onclick="guardarApartado()">GUARDAR PRODUCTOS ACTUALES</button>
+            </div>
+            <hr>
+            <h3>Apartados Pendientes</h3>
+            <div id="lista-apartados-db"></div>
+            <button class="btn volver" style="margin-top: 20px; width: 100%;" onclick="cerrarModal()">CERRAR VENTANA</button>
+        </div>
+    </div>
+
+    <script>
+        let carrito = []; 
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const cargo = localStorage.getItem("cargoUsuario") || "SUPERADMIN";
+            const nombre = localStorage.getItem("usuarioLogueado");
+
+            const elementoNombre = document.getElementById("nombre-perfil");
+            const elementoCargo = document.getElementById("rol-perfil");
+            const avatarContenedor = document.getElementById("avatar-contenedor");
+
+            if (elementoNombre) elementoNombre.textContent = nombre || "Invitado";
+            if (elementoCargo) elementoCargo.textContent = cargo.toUpperCase();
+
+            if (nombre && nombre.trim() !== "") {
+                avatarContenedor.innerHTML = `
+                    <img src="../Usuario/foto/${nombre}.jpg" 
+                         onerror="this.src='../Usuario/foto/${nombre}.png'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.webp'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.gif'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.jpeg'; 
+                                  this.onerror=function(){ this.parentElement.innerHTML='${nombre.charAt(0).toUpperCase()}'; }; }; }; };" 
+                         alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            if (cargo === "Vendedor") {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (!item.href.includes("Ventas.html")) {
+                        item.style.display = "none";
+                    }
+                });
+            }
+
+            // Cargar los datos dinámicamente desde la BD
+            cargarProductosEmprendedores();
+        });
+
+        function toggleMenu(menuId) {
+            document.querySelectorAll('.submenu').forEach(menu => {
+                if (menu.id !== menuId) menu.style.display = 'none';
+            });
+            const selected = document.getElementById(menuId);
+            if(selected) {
+                selected.style.display = (selected.style.display === 'block') ? 'none' : 'block';
+            }
+        }
+
+        function eliminarDelCarrito(id_producto) {
+            const index = carrito.findIndex(item => item.id_producto === id_producto);
+            if (index !== -1) {
+                if (carrito[index].cantidad > 1) {
+                    carrito[index].cantidad -= 1;
+                } else {
+                    carrito.splice(index, 1);
+                }
+            }
+            mostrarCarrito();
+        }
+
+        function mostrarCarrito() {
+            const contenedor = document.getElementById("carrito-lista");
+            contenedor.innerHTML = "";
+            
+            carrito.forEach((item) => {
+                const div = document.createElement("div");
+                div.className = "item-carrito";
+                div.innerHTML = `
+                    <span><b>(${item.cantidad}x)</b> ${item.nombre} - $${item.precio_unitario.toFixed(2)} c/u</span>
+                    <button onclick="eliminarDelCarrito(${item.id_producto})">❌</button>
+                `;
+                contenedor.appendChild(div);
+            });
+            actualizarTotales();
+        }
+
+        function actualizarTotales() {
+            let subtotal = carrito.reduce((acc, item) => acc + (item.precio_unitario * item.cantidad), 0);
+            let descuento = parseFloat(document.getElementById("descuento").value) || 0;
+            let total = Math.max(0, subtotal - descuento);
+            
+            document.getElementById("subtotal").textContent = subtotal.toFixed(2);
+            document.getElementById("total").textContent = total.toFixed(2);
+            calcularCambio();
+        }
+
+        function calcularCambio() {
+            let total = parseFloat(document.getElementById("total").textContent) || 0;
+            let pago = parseFloat(document.getElementById("pago").value) || 0;
+            document.getElementById("cambio").textContent = Math.max(0, pago - total).toFixed(2);
+        }
+
+        function vaciarCarrito() {
+            carrito = [];
+            document.getElementById("pago").value = "";
+            document.getElementById("descuento").value = "0";
+            mostrarCarrito();
+        }
+
+        document.querySelector('.cobrar').addEventListener('click', async function() {
+            if (carrito.length === 0) return alert("El carrito está vacío");
+            
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = "⌛ Procesando...";
+
+            const idUsuarioLogueado = parseInt(localStorage.getItem("idUsuario")) || 1;
+            const idClienteSeleccionado = 1; 
+
+            const datosVenta = {
+                productos: carrito, 
+                total: parseFloat(document.getElementById("total").textContent),
+                subtotal: parseFloat(document.getElementById("subtotal").textContent),
+                descuento: parseFloat(document.getElementById("descuento").value) || 0,
+                tipo_pago: document.getElementById("tipo_pago").value,
+                metodo_pago: document.getElementById("metodo_pago").value,
+                comprobante: document.getElementById("comprobante").value,
+                id_cliente: idClienteSeleccionado,
+                id_usuario: idUsuarioLogueado
+            };
+
+            try {
+                const response = await fetch('registrar_venta.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosVenta)
+                });
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    btn.style.backgroundColor = "#28a745";
+                    btn.innerHTML = "✅ VENTA EXITOSA";
+                    setTimeout(() => { vaciarCarrito(); location.reload(); }, 1000);
+                } else {
+                    alert("Error: " + data.message);
+                    btn.disabled = false; btn.innerHTML = "COBRAR";
+                }
+            } catch (err) {
+                alert("Error de comunicación con registrar_venta.php");
+                btn.disabled = false; btn.innerHTML = "COBRAR";
+            }
+        });
+
+        document.querySelector('.apartado').onclick = () => {
+            document.getElementById('modal-apartados').style.display = 'flex';
+            cargarApartados();
+        };
+
+        function cerrarModal() { document.getElementById('modal-apartados').style.display = 'none'; }
+
+        async function guardarApartado() {
+            const cliente = document.getElementById('nombre-cliente').value;
+            if (!cliente || carrito.length === 0) return alert("Faltan datos.");
+            try {
+                const res = await fetch('manejar_apartados.php?accion=guardar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cliente, productos: carrito })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert("¡Apartado guardado!");
+                    vaciarCarrito();
+                    cargarApartados();
+                }
+            } catch (e) { alert("Error al guardar el apartado."); }
+        }
+
+        function agregarAlCarrito(id_producto, nombre, precio_unitario, cantidadCargar = 1) {
+            const productoExistente = carrito.find(item => item.id_producto === id_producto);
+            const precioNum = parseFloat(precio_unitario) || 0;
+
+            if (productoExistente) {
+                productoExistente.cantidad += cantidadCargar;
+            } else {
+                carrito.push({
+                    id_producto: parseInt(id_producto),
+                    nombre: nombre,
+                    amount: cantidadCargar, 
+                    cantidad: cantidadCargar,
+                    precio_unitario: precioNum,
+                    descuento_linea: 0
+                });
+            }
+            mostrarCarrito();
+        }
+
+        async function cargarApartados() {
+            try {
+                const res = await fetch('manejar_apartados.php?accion=leer');
+                const data = await res.json();
+                const contenedor = document.getElementById('lista-apartados-db');
+                contenedor.innerHTML = data.length === 0 ? "<p>No hay apartados pendientes.</p>" : "";
+                
+                data.forEach(apartado => {
+                    const div = document.createElement('div');
+                    div.className = 'apartado-item';
+                    div.style.flexDirection = 'column'; 
+                    div.style.alignItems = 'flex-start';
+                    div.style.borderBottom = '2px solid #eee';
+                    div.style.padding = '15px 5px';
+                    
+                    let listaProductosHTML = "";
+                    apartado.productos.forEach(p => {
+                        listaProductosHTML += `• ${p.nombre_producto} (ID: ${p.id_producto}) - ${p.cantidad}pz x $${p.precio_unitario}<br>`;
+                    });
+
+                    const productosJSON = JSON.stringify(apartado.productos).replace(/"/g, '&quot;');
+
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 8px;">
+                            <div>
+                                <strong style="font-size: 1.05rem; color: #2c3e50;">👤 Cliente: ${apartado.cliente}</strong>
+                                <br><small style="color: #7f8c8d;">Fecha: ${apartado.fecha}</small>
+                            </div>
+                            <span style="font-weight: bold; color: #27ae60;">Total: $${apartado.total}</span>
+                        </div>
+                        <div style="background: #fdfdfd; border-left: 3px solid #3498db; width: 100%; padding: 8px; border-radius: 4px; font-size: 0.9rem; margin-bottom: 10px; color: #555; box-sizing: border-box;">
+                            ${listaProductosHTML}
+                        </div>
+                        <button class="btn-cargar" style="width: 100%; padding: 7px; font-weight: 600;" 
+                                onclick="pasarAlCarritoAgrupado('${productosJSON}', ${apartado.id_apartado})">
+                            🛒 Cargar Apartado
+                        </button>
+                    `;
+                    contenedor.appendChild(div);  
+                });
+            } catch (e) { console.error("Error al cargar apartados", e); }
+        }
+
+        async function pasarAlCarritoAgrupado(productosString, id_apartado) {
+            const productos = JSON.parse(productosString);
+            
+            productos.forEach(p => {
+                agregarAlCarrito(p.id_producto, p.nombre_producto, p.precio_unitario, p.cantidad);
+            });
+            
+            try {
+                await fetch('manejar_apartados.php?accion=borrar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id_apartado })
+                });
+            } catch (e) { console.error("Error al borrar el apartado", e); }
+            
+            cerrarModal(); 
+            cargarApartados(); 
+        }
+
+        // --- FUNCIÓN PRINCIPAL DE RENDERIZADO DINÁMICO CORREGIDA ---
+        async function cargarProductosEmprendedores() {
+            const contenedor = document.getElementById('contenedor-emprendedores');
+            try {
+                const res = await fetch('obtener_productos.php');
+                const data = await res.json();
+                
+                if (data.status === "error") {
+                    contenedor.innerHTML = `<p style="padding: 10px; color: #e74c3c;">${data.message}</p>`;
+                    return;
+                }
+
+                if (data.length === 0) {
+                    contenedor.innerHTML = "<p style='padding: 10px; color: #666;'>No hay emprendimientos activos.</p>";
+                    return;
+                }
+
+                contenedor.innerHTML = ""; 
+
+                data.forEach(emp => {
+                    const empContainer = document.createElement('div');
+                    empContainer.className = 'entrepreneur-container';
+                    const menuId = `menu-emp-${emp.id_emprendedor}`;
+
+                    // Generar lista de productos con precios validados
+                    let HTMLProductos = "";
+                    if (emp.productos && emp.productos.length > 0) {
+                        emp.productos.forEach(p => {
+                            const nombreLimpio = p.nombre_producto.replace(/'/g, "\\'");
+                            const precioNum = parseFloat(p.precio) || 0;
+                            
+                            HTMLProductos += `
+                                <p onclick="agregarAlCarrito(${p.id_producto}, '${nombreLimpio}', ${precioNum})">
+                                    <span>${p.nombre_producto}</span>
+                                    <b>$${precioNum.toFixed(2)}</b>
+                                </p>
+                            `;
+                        });
+                    } else {
+                        HTMLProductos = `<p style="color: #999; font-style: italic; cursor: default; padding: 10px 15px;">Sin productos en stock</p>`;
+                    }
+
+                    const idEmp = emp.id_emprendedor;
+                    
+                    // Prioriza la marca. Si no existe, usa el nombre del emprendedor.
+                    const marcaEmp = emp.nombre_emprendimiento || emp.nombre_empresa || emp.nombre_emprendedor;
+
+                    // CORRECCIÓN DE ESPACIOS: Crea un string cambiando todos los espacios por guiones bajos para buscar los archivos
+                    const marcaEmpFoto = marcaEmp.replace(/ /g, "_");
+
+                    // Ruta raíz consistente para las fotos
+                    const carpetaFotos = "../Emprendedores/foto_emprendedores/";
+                    const rutaInicial = `${carpetaFotos}${idEmp}.jpg`;
+
+                    empContainer.innerHTML = `
+                        <div class="entrepreneur-item" onclick="toggleMenu('${menuId}')">
+                            <div class="avatar-emp">
+                                <img src="${rutaInicial}" 
+                                     onerror="
+                                         // Intento 2: Probar ID con extensión .JPG
+                                         this.src='${carpetaFotos}${idEmp}.JPG'; 
+                                         this.onerror=function(){ 
+                                             // Intento 3: Probar ID con extensión .png
+                                             this.src='${carpetaFotos}${idEmp}.png'; 
+                                             this.onerror=function(){ 
+                                                 // Intento 4: Probar usando la marca mapeada con guiones bajos (.jpg)
+                                                 this.src='${carpetaFotos}${marcaEmpFoto}.jpg';
+                                                 this.onerror=function(){
+                                                     // Intento 5: Probar usando la marca mapeada con guiones bajos (.png)
+                                                     this.src='${carpetaFotos}${marcaEmpFoto}.png';
+                                                     this.onerror=function(){
+                                                         // Si todo falla, pintar la letra inicial limpia de la marca
+                                                         this.parentElement.innerHTML='<span>${marcaEmp.charAt(0).toUpperCase()}</span>';
+                                                     };
+                                                 };
+                                             };
+                                         };
+                                     " 
+                                     alt="Foto">
+                            </div>
+                            <span class="emp-name">${marcaEmp}</span>
+                        </div>
+                        <div class="submenu" id="${menuId}">
+                            ${HTMLProductos}
+                        </div>
+                    `;
+                    contenedor.appendChild(empContainer);
+                });
+            } catch (e) {
+                console.error("Error en frontend:", e);
+                contenedor.innerHTML = "<p style='padding: 10px; color: #e74c3c;'>Error al conectar con obtener_productos.php</p>";
+            }
+        }
+    </script>
+</body>
+</html>

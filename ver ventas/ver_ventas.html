@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas - Nova</title>
+    <link rel="stylesheet" href="../Esteticos/estilos_dashboard.css">
+    <link rel="stylesheet" href="../ventas/ventas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .main-content { margin-left: 16.5%; width: calc(100% - 280px); padding: 40px; background-color: #f9f9f9; display: flex; flex-direction: column; gap: 30px; }
+        .pedido-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; box-sizing: border-box;}
+        
+        .btn-logout {
+            width: 100%; background-color: #ffffff; border: 1px solid #ebd1d9; padding: 15px;
+            border-radius: 10px; font-size: 15px; font-weight: bold; color: #333;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: background-color 0.2s;
+        }
+        .btn-logout:hover { background-color: #fdf5f7; }
+
+        .tabla-productos { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .tabla-productos th { background: #fce4ec; padding: 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ebd1d9; }
+        .tabla-productos td { padding: 12px; border-bottom: 1px solid #eee; color: #555; }
+        .tabla-productos tbody tr:hover { background-color: #fff9fa; }
+        
+        .btn-ver { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .btn-ver:hover { background: #2980b9; }
+
+        /* --- AJUSTES PARA EL AVATAR UNIFICADO --- */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden; /* Recorta la imagen en círculo automáticamente */
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Evita la distorsión de la foto */
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar" style="display: flex; flex-direction: column; height: 100vh; position: fixed;">     
+            <div class="logo-container"><img src="../Esteticos/logo.png" alt="Nova"></div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="ver_ventas.html" class="nav-item active">📋 Historial de Ventas</a>
+                <a href="../Inventarios/inventarios.html" class="nav-item">📦 Inventarios</a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+            </nav>
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" onclick="localStorage.clear();"><span>🚪 Salir</span></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="vista-historial" class="pedido-card">
+                <h1 style="font-family: serif; letter-spacing: 3px; border-left: 5px solid #fce4ec; padding-left: 15px; margin-bottom: 20px;">HISTORIAL DE VENTAS</h1>
+                
+                <table class="tabla-productos">
+                    <thead>
+                        <tr>
+                            <th>ID VENTA</th>
+                            <th>FECHA</th>
+                            <th>SUBTOTAL</th>
+                            <th>DESCUENTO</th>
+                            <th>TOTAL</th>
+                            <th>TIPO PAGO</th>
+                            <th>COMPROBANTE</th>
+                            <th width="100">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ventas-cuerpo">
+                        <tr><td colspan="8" style="text-align:center;">Cargando historial desde la base de datos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Control de Perfiles de Usuario y Avatar Unificado
+            const nombre = localStorage.getItem("usuarioLogueado") || "Usuario Desconocido";
+            const cargo = localStorage.getItem("cargoUsuario") || "SUPERADMIN";
+            const avatarContenedor = document.getElementById('avatar-contenedor');
+            
+            if (document.getElementById("nombre-perfil")) document.getElementById("nombre-perfil").textContent = nombre;
+            if (document.querySelector(".user-role")) document.querySelector(".user-role").textContent = cargo.toUpperCase();
+
+            // Cadena secuencial de verificación de imágenes
+            if (nombre !== "Usuario Desconocido") {
+                avatarContenedor.innerHTML = `
+                    <img src="../Usuario/foto/${nombre}.jpg" 
+                        onerror="this.src='../Usuario/foto/${nombre}.png'; 
+                                 this.onerror=function(){ this.src='../Usuario/foto/${nombre}.webp'; 
+                                 this.onerror=function(){ this.src='../Usuario/foto/${nombre}.gif'; 
+                                 this.onerror=function(){ this.src='../Usuario/foto/${nombre}.jpeg'; 
+                                 this.onerror=function(){ this.parentElement.innerHTML='${nombre.charAt(0).toUpperCase()}'; }; }; }; };" 
+                        alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            // Restricción por rol de Vendedor
+            if (cargo === "Vendedor") {
+                document.querySelector('.main-content').innerHTML = `
+                    <div class="pedido-card">
+                        <h2>Bienvenida, ${nombre}</h2>
+                        <p>Tu cargo actual es <b>${cargo}</b>. No tienes permisos para acceder a este módulo.</p>
+                    </div>`;
+                return; // Frena la ejecución para no cargar el historial si es vendedor
+            }
+
+            // Si pasa la validación de rol, carga el historial
+            cargarHistorialVentas();
+        });
+
+        function cargarHistorialVentas() {
+            fetch('obtener_ventas.php?accion=listar')
+                .then(response => response.json())
+                .then(ventas => {
+                    const cuerpoTabla = document.getElementById("tabla-ventas-cuerpo");
+                    cuerpoTabla.innerHTML = "";
+
+                    if(ventas.length === 0) {
+                        cuerpoTabla.innerHTML = "<tr><td colspan='8' style='text-align:center;'>No hay registros de ventas.</td></tr>";
+                        return;
+                    }
+
+                    ventas.forEach(venta => {
+                        const fila = `
+                            <tr>
+                                <td><b>#${venta.id_venta}</b></td>
+                                <td>${venta.fecha}</td>
+                                <td>$${parseFloat(venta.subtotal).toFixed(2)}</td>
+                                <td>$${parseFloat(venta.descuento).toFixed(2)}</td>
+                                <td style="font-weight:600; color:#2c3e50;">$${parseFloat(venta.total).toFixed(2)}</td>
+                                <td>${venta.tipo_pago}</td>
+                                <td><span style="background:#eee; padding:3px 8px; border-radius:4px; font-size:12px;">${venta.comprobante}</span></td>
+                                <td>
+                                    <button class="btn-ver" onclick="window.location.href='Detalle_venta.html?id_venta=${venta.id_venta}'">🔍 Ver artículos</button>
+                                </td>
+                            </tr>
+                        `;
+                        cuerpoTabla.innerHTML += fila;
+                    });
+                })
+                .catch(err => {
+                    document.getElementById("tabla-ventas-cuerpo").innerHTML = "<tr><td colspan='8' style='text-align:center; color:red;'>Error al conectar con el servidor.</td></tr>";
+                });
+        }
+    </script>
+</body>
+</html>

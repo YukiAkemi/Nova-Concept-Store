@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Nova Concept Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../Esteticos/estilos_dashboard.css">
+    
+    <style>
+        :root {
+            --rosa-principal: #E8B4BC;
+            --rosa-oscuro: #C4969F;
+        }
+
+        .main-content {
+            padding: 40px;
+            background-color: #f8f9fa;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--rosa-principal);
+            padding-bottom: 15px;
+            width: 90%;
+        }
+
+        .info-marca {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .marca-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--rosa-principal);
+            object-fit: cover;
+            background: white;
+        }
+
+        .btn-crear {
+            background-color: var(--rosa-principal);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-crear:hover {
+            background-color: var(--rosa-oscuro);
+        }
+
+        .tabla-productos {
+            width: 90%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-top: 15px;
+        }
+
+        .tabla-productos th {
+            background-color: #fce4e8;
+            color: #333;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .tabla-productos td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #555;
+            text-align: left;
+        }
+
+        .tabla-productos tr:hover {
+            background-color: #fff9fa;
+        }
+
+        .badge-categoria {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #e2e3e5;
+            color: #383d41;
+            display: inline-block;
+        }
+
+        .acciones-btns {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            color: var(--rosa-oscuro);
+            text-decoration: none;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+        .btn-icon:hover { transform: scale(1.15); }
+        .btn-icon.delete { color: #dc3545; }
+
+        .contenido {
+            background-color: #ffffff;
+            border-radius: 15px;
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            padding: 30px 0;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">            
+            <div class="logo-container">
+                <img src="../Esteticos/logo.png" alt="Logo Nova">
+            </div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="letra-avatar">U</span>
+                </div>
+                <div class="user-info">
+                    <p class="user-name" id="nombre-perfil">Cargando...</p>
+                    <p class="user-role">ADMINISTRADOR</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">
+                    <span class="icon">💰 Ventas</span>
+                </a>
+                <a href="../ver ventas/ver_ventas.html" class="nav-item">
+                    <span class="icon">📋 Historial de Ventas</span>
+                </a>
+                <a href="inventarios.html" class="nav-item">
+                    <span class="icon">📦 Inventarios</span>
+                </a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">
+                    <span class="icon">🚀 Emprendedores</span>
+                </a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">
+                    <span class="icon">👤 Usuarios</span>
+                </a>
+            </nav>
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" onclick="localStorage.clear();" style="text-decoration: none;">
+                    <span class="icon">🚪 Salir</span> 
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section class="contenido">
+                <div class="header-section">
+                    <div class="info-marca">
+                        <img src="../Esteticos/default_marca.png" id="img-marca" class="marca-avatar">
+                        <div>
+                            <h1 id="titulo-marca">Inventario</h1>
+                            <p style="color: #666; font-size: 14px;">Gestión de productos existentes</p>
+                        </div>
+                    </div>
+                    <a href="#" id="btn-nuevo-producto" class="btn-crear"><i class="fas fa-plus"></i> Nuevo Producto</a>
+                </div>
+
+                <div style="margin-bottom: 20px; width: 90%; text-align: left;">
+                    <a href="inventarios.html" style="text-decoration: none; color: var(--rosa-oscuro); font-weight: 600;">
+                        <i class="fas fa-chevron-left"></i> Volver a emprendedores
+                    </a>
+                </div>
+
+                <table class="tabla-productos">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Categoría</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-productos">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #888;">Cargando productos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            const idEmprendedor = params.get('id');
+            const nombreMarca = params.get('nombre');
+            
+            if (!idEmprendedor) {
+                document.getElementById('lista-productos').innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Error: No se especificó el emprendedor.</td></tr>`;
+                return;
+            }
+
+            if (nombreMarca) {
+                document.getElementById('titulo-marca').textContent = "Inventario: " + nombreMarca;
+                document.title = "Productos - " + nombreMarca;
+
+                const nombreSeguro = nombreMarca.replace(/ /g, "_").replace(/[^A-Za-z0-9_\-]/g, "");
+                const rutaBase = `../Emprendedores/foto_emprendedores/${nombreSeguro}`;
+                const imgElement = document.getElementById('img-marca');
+                
+                imgElement.src = `${rutaBase}.jpg`;
+                imgElement.onerror = function() {
+                    this.src = `${rutaBase}.png`;
+                    this.onerror = function() {
+                        this.src = `${rutaBase}.webp`;
+                        this.onerror = function() {
+                            this.src = '../Esteticos/default.png';
+                        };
+                    };
+                };
+            }
+
+            document.getElementById('btn-nuevo-producto').href = `crear_producto.php?id_emprendedor=${idEmprendedor}`;
+
+            const tbody = document.getElementById('lista-productos');
+
+            fetch(`obtener_productos_marca.php?id=${idEmprendedor}`)
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = ""; 
+
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">${data.error}</td></tr>`;
+                    return;
+                }
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #888;">Este emprendedor no tiene productos en inventario.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(prod => {
+                    const fila = `
+                        <tr>
+                            <td><strong>${prod.nombre}</strong></td>
+                            <td>${prod.descripcion || 'Sin descripción'}</td>
+                            <td>$${prod.precio_unitario.toFixed(2)}</td>
+                            <td><span class="badge-categoria">Cat. ${prod.id_categoria}</span></td>
+                            <td>
+                                <div class="acciones-btns">
+                                    <a href="editar_producto.php?id=${prod.id_producto}" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
+                                    <a href="#" class="btn-icon delete" onclick="eliminarProducto(${prod.id_producto}); return false;" title="Eliminar"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>`;
+                    tbody.innerHTML += fila;
+                });
+            } )
+            .catch(err => {
+                console.error("Error al cargar productos:", err);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Error al conectar con el servidor.</td></tr>`;
+            });
+        });
+
+        function eliminarProducto(id) {
+            if (confirm("¿Seguro que deseas eliminar este producto del inventario?")) {
+                fetch(`eliminar_producto.php?id=${id}`)
+                .then(res => {
+                    if(!res.ok) { throw new Error("Error en la red"); }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Producto eliminado exitosamente.");
+                        location.reload(); 
+                    } else {
+                        alert("Error al eliminar: " + (data.error || "Desconocido"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    alert("No se pudo conectar con el servidor para eliminar el producto.");
+                });
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const nombre = localStorage.getItem("usuarioLogueado");
+            const cargo = localStorage.getItem("cargoUsuario");
+
+            const elementoNombre = document.getElementById("nombre-perfil");
+            const elementoCargo = document.querySelector(".user-role");
+            const avatarContenedor = document.getElementById("avatar-contenedor");
+
+            if (elementoNombre) elementoNombre.textContent = nombre || "Invitado";
+            if (elementoCargo) elementoCargo.textContent = (cargo || "SIN CARGO").toUpperCase();
+
+            if (nombre && nombre.trim() !== "") {
+                avatarContenedor.innerHTML = `
+                    <img src="../Usuario/foto/${nombre}.jpg" 
+                         onerror="this.src='../Usuario/foto/${nombre}.png'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.webp'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.gif'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.jpeg'; 
+                                  this.onerror=function(){ this.parentElement.innerHTML='${nombre.charAt(0).toUpperCase()}'; }; }; }; };" 
+                         alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="letra-avatar">U</span>`;
+            }
+        });
+    </script>
+</body>
+</html>

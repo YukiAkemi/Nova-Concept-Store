@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Emprendedores - Nova Concept Store</title>
+    <link rel="stylesheet" href="../Esteticos/estilos_dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .content-card {
+            justify-content: flex-start !important;
+            align-items: stretch !important;
+            padding: 40px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f2d8df;
+            padding-bottom: 10px;
+        }
+        .input-box { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .input-box label { margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px; }
+        .input-box input, .input-box select { 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #ebd4db; 
+            background-color: #fdfafb;
+            font-family: 'Open Sans', sans-serif;
+        }
+        .btn-registrar {
+            background-color: #d6adba;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-registrar:hover { background-color: #c599a8; }
+        
+        .btn-cancelar {
+            background-color: #6c757d !important;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-cancelar:hover { background-color: #5a6268; }
+
+        .seccion-gestion { 
+            margin-top: 40px; 
+            padding-top: 20px; 
+            border-top: 2px dashed #f2d8df; 
+        }
+
+        /* Contenedor de acciones inferiores agrupadas */
+        .acciones-grupo {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-buscar-editar {
+            background-color: #e2f0fe;
+            color: #185abc;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 50%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-buscar-editar:hover { 
+            background-color: #cfe5ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-eliminar {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 50%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-eliminar:hover { 
+            background-color: #f5c6cb;
+            transform: translateY(-2px);
+        }
+
+        #respuestaRegistro { 
+            margin-top: 20px; 
+            padding: 12px; 
+            border-radius: 8px; 
+            display: none; 
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* --- PREVISUALIZACIÓN DE LOGO/FOTO --- */
+        .preview-container {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-preview {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid #d6adba;
+            object-fit: cover;
+            display: none; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar">     
+            <div class="logo-container">
+                <img src="../Esteticos/logo.png" alt="Logo Nova">
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="../ver ventas/ver_ventas.html" class="nav-item">📋 Historial de Ventas</a>
+                <a href="../Inventarios/inventarios.html" class="nav-item">📦 Inventarios</a>
+                <a href="Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+            </nav>
+
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" style="text-decoration: none;" onclick="localStorage.clear();">🚪 Salir</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">    
+                <div class="title" id="tituloModulo">🚀 Gestión de Emprendedores</div> 
+                
+                <form id="formRegistroEmprendedor" enctype="multipart/form-data">
+                    <input type="hidden" name="id_emprendedor" id="idEmprendedorHidden" value="">
+
+                    <div class="input-box">
+                        <label>Nombre del Emprendimiento</label>
+                        <input type="text" name="nombre_emprendimiento" id="inputEmprendimiento" required placeholder="Ej: Artesanías Luna">
+                    </div>
+                    <div class="input-box">
+                        <label>Nombre del Responsable</label>
+                        <input type="text" name="nombre" id="inputResponsable" required placeholder="Ej: Juan Pérez">
+                    </div>
+                    <div class="input-box">
+                        <label>Teléfono de Contacto</label>
+                        <input type="tel" name="telefono" id="inputTelefono" required pattern="[0-9]{10}" maxlength="10" placeholder="Ej: 6141234567" title="El número de teléfono debe tener exactamente 10 dígitos numéricos.">
+                    </div>
+                    <div class="input-box">
+                        <label>Correo Electrónico</label>
+                        <input type="email" name="correo" id="inputCorreo" required placeholder="Ej: contacto@marca.com">
+                    </div>
+                    <div class="input-box">
+                        <label>Foto o Logo del Emprendimiento</label>
+                        <input type="file" name="foto" id="inputFoto" accept="image/*">
+                        
+                        <div class="preview-container">
+                            <img id="imgPreview" class="image-preview" src="#" alt="Previsualización">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="btnGuardar" class="btn-registrar">Registrar Emprendedor</button>
+                    <button type="button" id="btnCancelarEdicion" class="btn-cancelar" style="display: none;">❌ Cancelar Edición</button>
+                </form>
+
+                <div id="respuestaRegistro"></div>
+
+                <div class="seccion-gestion">
+                    <div class="title" style="font-size: 18px; border: none; margin-bottom: 10px;">🛠️ Gestionar Emprendedores</div>
+                    <div class="input-box">
+                        <label>Selecciona un Emprendedor de la lista para gestionar:</label>
+                        <select id="listaEmprendedores">
+                            <option value="">Cargando emprendedores...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="acciones-grupo">
+                        <button type="button" id="btnCargarEditar" class="btn-buscar-editar">✏️ Modificar</button>
+                        <button type="button" id="btnEliminar" class="btn-eliminar">❌ Eliminar</button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let listaGlobalEmprendedores = [];
+        const form = document.getElementById('formRegistroEmprendedor');
+        const respuestaDiv = document.getElementById('respuestaRegistro');
+        const selectEmprendedores = document.getElementById('listaEmprendedores');
+        const idEmprendedorHidden = document.getElementById('idEmprendedorHidden');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
+        const tituloModulo = document.getElementById('tituloModulo');
+        const imgPreview = document.getElementById('imgPreview');
+        const inputFoto = document.getElementById('inputFoto');
+        const inputTelefono = document.getElementById('inputTelefono');
+
+        // Validación en tiempo real para el teléfono (impide letras, espacios o caracteres especiales)
+        inputTelefono.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Función para limpiar el nombre y predecir el archivo físico en la previsualización
+        function limpiarNombreArchivo(texto) {
+            $buscar     = ['á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', 'ñ', 'Ñ', ' '];
+            $reemplazar = ['a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'n', 'n', '_'];
+            let limpio = texto;
+            for(let i=0; i<$buscar.length; i++){
+                limpio = limpio.split($buscar[i]).join($reemplazar[i]);
+            }
+            return limpio.toLowerCase().replace(/[^A-Za-z0-9\_]/g, '');
+        }
+
+        // Cargar datos en los Selects
+        function cargarEmprendedores() {
+            fetch('obtener_emprendedores.php')
+            .then(res => res.json())
+            .then(data => {
+                selectEmprendedores.innerHTML = '<option value="">Selecciona un emprendedor...</option>';
+                
+                if(data.error || !Array.isArray(data)) {
+                    selectEmprendedores.innerHTML = '<option value="">Error al cargar datos</option>';
+                    return;
+                }
+                
+                listaGlobalEmprendedores = data;
+
+                data.forEach(emp => {
+                    let option = document.createElement('option');
+                    option.value = emp.id_emprendedor;
+                    option.textContent = `${emp.nombre_emprendimiento} (${emp.nombre})`;
+                    selectEmprendedores.appendChild(option);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                selectEmprendedores.innerHTML = '<option value="">Error de conexión</option>';
+            });
+        }
+
+        // Previsualización de Imagen local
+        inputFoto.addEventListener('change', function() {
+            const archivo = this.files[0];
+            if (archivo) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgPreview.src = e.target.result;
+                    imgPreview.style.display = 'block';
+                }
+                reader.readAsDataURL(archivo);
+            } else {
+                if(!idEmprendedorHidden.value) {
+                    imgPreview.src = '#';
+                    imgPreview.style.display = 'none';
+                }
+            }
+        });
+
+        // EVENTO MODIFICAR: Mover datos al formulario principal
+        document.getElementById('btnCargarEditar').addEventListener('click', () => {
+            const id = selectEmprendedores.value;
+            
+            if(!id) {
+                alert("Por favor, selecciona un emprendedor de la lista primero.");
+                return;
+            }
+
+            const emprendedor = listaGlobalEmprendedores.find(emp => emp.id_emprendedor == id);
+
+            if(emprendedor) {
+                // Transferir datos a los campos
+                idEmprendedorHidden.value = mapId(emprendedor);
+                document.getElementById('inputEmprendimiento').value = emprendedor.nombre_emprendimiento || "";
+                document.getElementById('inputResponsable').value = emprendedor.nombre || "";
+                document.getElementById('inputTelefono').value = emprendedor.telefono || emprendedor.tel || "";
+                document.getElementById('inputCorreo').value = emprendedor.correo || emprendedor.email || ""; 
+                
+                // Intentar cargar la vista previa de la foto existente basada en su nombre limpio
+                let nombreLimpio = limpiarNombreArchivo(emprendedor.nombre_emprendimiento);
+                imgPreview.src = `foto_emprendedores/${nombreLopt_limpio}.jpg`;
+                imgPreview.src = `foto_emprendedores/${nombreLimpio}.jpg`;
+                imgPreview.style.display = 'block';
+                imgPreview.onerror = function() { 
+                    this.src = `foto_emprendedores/${nombreLimpio}.png`; 
+                    this.onerror = function() { 
+                        this.src = `foto_emprendedores/${nombreLimpio}.jpeg`;
+                        this.onerror = function() { this.style.display = 'none'; }
+                    }
+                };
+
+                // Cambiar textos visuales a Modo Edición
+                tituloModulo.textContent = "✏️ Modificar Emprendedor";
+                btnGuardar.textContent = "Actualizar en Base de Datos";
+                btnCancelarEdicion.style.display = "block";
+
+                form.scrollIntoView({ behavior: 'smooth' }); 
+            }
+        });
+
+        function mapId(emp) { return emp.id_emprendedor || emp.id; }
+
+        // Salir del modo edición de forma limpia
+        function resetearFormulario() {
+            form.reset();
+            idEmprendedorHidden.value = "";
+            imgPreview.src = '#';
+            imgPreview.style.display = 'none';
+            
+            tituloModulo.textContent = "🚀 Gestión de Emprendedores";
+            btnGuardar.textContent = "Registrar Emprendedor";
+            btnCancelarEdicion.style.display = "none";
+        }
+
+        btnCancelarEdicion.addEventListener('click', resetearFormulario);
+
+        // Enviar Formulario (Registrar o Actualizar)
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            
+            btnGuardar.disabled = true;
+            respuestaDiv.style.display = 'none';
+
+            const formData = new FormData(this); 
+            
+            // Si idEmprendedorHidden tiene valor, manda a modificar, de lo contrario registra nuevo
+            const urlDestino = idEmprendedorHidden.value ? 'modificar_emprendedor.php' : 'procesar_registro_emprendedor.php';
+
+            fetch(urlDestino, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                respuestaDiv.style.display = 'block';
+                respuestaDiv.textContent = data.message;
+                
+                if (data.status === 'success') {
+                    respuestaDiv.style.backgroundColor = '#d4edda';
+                    respuestaDiv.style.color = '#155724';
+                    resetearFormulario();
+                    cargarEmprendedores(); 
+                } else {
+                    respuestaDiv.style.backgroundColor = '#f8d7da';
+                    respuestaDiv.style.color = '#721c24';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                respuestaDiv.style.display = 'block';
+                respuestaDiv.style.backgroundColor = '#f8d7da';
+                respuestaDiv.style.color = '#721c24';
+                respuestaDiv.textContent = "Error al procesar la solicitud en el servidor.";
+            })
+            .finally(() => {
+                btnGuardar.disabled = false;
+            });
+        };
+
+        // Procesar la Eliminación
+        document.getElementById('btnEliminar').onclick = function() {
+            const idEmprendedor = selectEmprendedores.value;
+            
+            if(!idEmprendedor) {
+                alert("Por favor, selecciona un emprendedor para eliminar.");
+                return;
+            }
+
+            if(confirm("¿Estás seguro de que deseas eliminar este emprendedor? Esta acción no se puede deshacer.")) {
+                const formData = new FormData();
+                formData.append('id_emprendedor', idEmprendedor);
+
+                fetch('eliminar_emprendedor.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if(data.status === 'success') {
+                        if(idEmprendedorHidden.value === idEmprendedor) {
+                            resetearFormulario();
+                        }
+                        cargarEmprendedores(); 
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', cargarEmprendedores);
+    </script>
+
+    <script>
+        // SCRIPT DE PERFIL E INTERFAZ
+        document.addEventListener("DOMContentLoaded", function() {
+            const nombre = localStorage.getItem("usuarioLogueado");
+            const cargo = localStorage.getItem("cargoUsuario");
+
+            const elementoNombre = document.getElementById("nombre-perfil");
+            const elementoCargo = document.getElementById("rol-perfil");
+            const avatarContenedor = document.getElementById("avatar-contenedor");
+
+            if (elementoNombre) elementoNombre.textContent = nombre || "Invitado";
+            if (elementoCargo) elementoCargo.textContent = (cargo || "SIN CARGO").toUpperCase();
+
+            if (nombre && nombre.trim() !== "") {
+                avatarContenedor.innerHTML = `
+                    <img src="../Usuario/foto/${nombre}.jpg" 
+                         onerror="this.src='../Usuario/foto/${nombre}.png'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.webp'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.gif'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.jpeg'; 
+                                  this.onerror=function(){ this.parentElement.innerHTML='${nombre.charAt(0).toUpperCase()}'; }; }; }; };" 
+                         alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            if (cargo === "Vendedor") {
+                document.querySelectorAll('.nav-menu .nav-item').forEach(item => {
+                    if (!item.href.includes("privera_vista.html")) {
+                        item.style.display = "none";
+                    }
+                });       
+                
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="content-card">
+                            <h2>Bienvenida, ${nombre || 'Usuario'}</h2>
+                            <p>Tu cargo actual es <b>${cargo}</b>. No tienes permisos para acceder a los módulos de gestión.</p>
+                        </div>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventarios - Nova Concept Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../Esteticos/estilos_dashboard.css">
+    <style>
+        /* --- CENTRADO DEL ENCABEZADO --- */
+        .header-section { 
+            margin-bottom: 30px; 
+            border-bottom: 2px solid #E8B4BC; 
+            padding-bottom: 15px; 
+            text-align: center; 
+        }
+        
+        /* --- REJILLA HORIZONTAL Y CENTRADA PERFECTA --- */
+        .emprendedores-grid { 
+            display: grid; 
+            /* Forzamos a que las columnas midan exactamente 220px y no se estiren al 100% */
+            grid-template-columns: repeat(auto-fit, 220px); 
+            gap: 25px; 
+            width: 100%;
+            align-items: start;
+            justify-content: center; /* Centra el bloque completo de tarjetas en el espacio disponible */
+        }
+        
+        .emprendedor-card { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 20px; 
+            text-align: center; 
+            text-decoration: none; 
+            color: inherit; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            transition: 0.3s; 
+            border: 1px solid #eee; 
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .emprendedor-card:hover { transform: translateY(-5px); border-color: #E8B4BC; box-shadow: 0 8px 25px rgba(196, 150, 159, 0.2); }
+        .emprendedor-logo { width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 3px solid #E8B4BC; background: #f9f9f9; display: flex; align-items: center; justify-content: center;}
+        .emprendedor-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .emprendedor-nombre { font-weight: 600; font-size: 1.1rem; color: #333; margin-bottom: 8px;}
+        .stat-number { display: block; font-size: 20px; font-weight: bold; color: #C4969F; }
+        .stat-label { font-size: 12px; color: #6c757d; text-transform: uppercase; }
+
+        /* --- ESTILOS CONTROLADORES PARA EL AVATAR EN CÍRCULO --- */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo-container"><img src="../Esteticos/logo.png" alt="Logo Nova"></div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                    <p class="user-name" id="nombre-perfil">Cargando...</p>
+                    <p class="user-role">ADMINISTRADOR</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">
+                    <span class="icon">💰 Ventas</span>
+                </a>
+                <a href="../ver ventas/ver_ventas.html" class="nav-item">
+                    <span class="icon">📋 Historial de Ventas</span>
+                </a>
+                <a href="inventarios.html" class="nav-item">
+                    <span class="icon">📦 Inventarios</span>
+                </a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">
+                    <span class="icon">🚀 Emprendedores</span>
+                </a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">
+                    <span class="icon">👤 Usuarios</span>
+                </a>
+            </nav>
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" onclick="localStorage.clear();"><span>🚪 Salir</span></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section class="content-card">
+                <div class="header-section">
+                    <h1><i class="fas fa-boxes"></i> Inventarios por Emprendedor</h1>
+                    <p>Selecciona una marca para gestionar sus productos.</p>
+                </div>
+
+                <div class="emprendedores-grid" id="grid-emprendedores"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function cargarTarjetasInventario() {
+            const grid = document.getElementById('grid-emprendedores');
+            
+            fetch('obtener_marcas_inventario.php')
+            .then(res => res.json())
+            .then(data => {
+                grid.innerHTML = ""; 
+
+                if (data.error || data.length === 0) {
+                    grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #888;">No hay emprendedores registrados todavía.</p>`;
+                    return;
+                }
+
+                data.forEach(emp => {
+                    const nombreSeguro = emp.nombre_emprendimiento.replace(/ /g, "_").replace(/[^A-Za-z0-9_\-]/g, "");
+                    
+                    const rutaBase = `../Emprendedores/foto_emprendedores/${nombreSeguro}`;
+                    const imgJpg  = `${rutaBase}.jpg`;
+                    const imgPng  = `${rutaBase}.png`;
+                    const imgWebp = `${rutaBase}.webp`;
+                    const imgDefault = '../Esteticos/default.png';
+
+                    const card = `
+                        <a href="detalle_inventario.html?id=${emp.id_emprendedor}&nombre=${encodeURIComponent(emp.nombre_emprendimiento)}" class="emprendedor-card">
+                            <div class="emprendedor-logo">
+                                <img src="${imgJpg}" 
+                                     alt="Logo de ${emp.nombre_emprendimiento}" 
+                                     onerror="
+                                        if (this.src.endsWith('.jpg')) { 
+                                            this.src = '${imgPng}'; 
+                                        } else if (this.src.endsWith('.png')) { 
+                                            this.src = '${imgWebp}'; 
+                                        } else { 
+                                            this.onerror = null; 
+                                            this.src = '${imgDefault}'; 
+                                        }
+                                     ">
+                            </div>
+                            <div class="emprendedor-nombre">${emp.nombre_emprendimiento}</div>
+                            <div class="emprendedor-stat">
+                                <span class="stat-number">${emp.total_productos}</span>
+                                <span class="stat-label">Productos</span>
+                            </div>
+                        </a>`;
+                    grid.innerHTML += card;
+                });
+            })
+            .catch(err => {
+                console.error("Error al cargar marcas:", err);
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: red;">Error al conectar con el servidor.</p>`;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarTarjetasInventario);
+    </script>
+
+    <script>
+        // CONTROL DE ACCESOS Y DATOS DE USUARIO LOGUEADO
+        document.addEventListener("DOMContentLoaded", function() {
+            const nombre = localStorage.getItem("usuarioLogueado");
+            const cargo = localStorage.getItem("cargoUsuario");
+
+            const elementoNombre = document.getElementById("nombre-perfil");
+            const elementoCargo = document.querySelector(".user-role");
+            const avatarContenedor = document.getElementById("avatar-contenedor");
+
+            if (elementoNombre) elementoNombre.textContent = nombre || "Invitado";
+            if (elementoCargo) elementoCargo.textContent = (cargo || "SIN CARGO").toUpperCase();
+
+            if (nombre && nombre.trim() !== "") {
+                avatarContenedor.innerHTML = `
+                    <img src="../Usuario/foto/${nombre}.jpg" 
+                         onerror="this.src='../Usuario/foto/${nombre}.png'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.webp'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.gif'; 
+                                  this.onerror=function(){ this.src='../Usuario/foto/${nombre}.jpeg'; 
+                                  this.onerror=function(){ this.parentElement.innerHTML='${nombre.charAt(0).toUpperCase()}'; }; }; }; };" 
+                         alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            if (cargo === "Vendedor") {
+                const itemsMenu = document.querySelectorAll('.nav-item');
+                itemsMenu.forEach(item => {
+                    if (!item.href.includes("dashboard.html")) {
+                        item.style.display = "none";
+                    }
+                });       
+                
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="content-card">
+                            <h2>Bienvenida, ${nombre || 'Usuario'}</h2>
+                            <p>Tu cargo actual es <b>${cargo}</b>. No tienes permisos para acceder a los módulos de gestión.</p>
+                        </div>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

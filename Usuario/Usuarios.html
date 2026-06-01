@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuarios - Nova Concept Store</title>
+    <link rel="stylesheet" href="../esteticos/estilos_ventas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght=300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .input-box { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .input-box label { margin-bottom: 5px; font-weight: 600; color: #333; }
+        .input-box input, .input-box select { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Open Sans', sans-serif; }
+        #respuestaRegistro { padding: 15px; border-radius: 5px; text-align: center; font-weight: 600; margin-top: 20px; display: none; }
+        .seccion-eliminar { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
+        
+        /* --- NUEVOS ESTILOS PARA LA PREVIEW DEL FORMULARIO --- */
+        .preview-container {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-preview {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid #d6adba;
+            object-fit: cover;
+            display: none; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Contenedor de acciones inferiores agrupadas */
+        .acciones-grupo {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-eliminar {     
+            padding: 15px 20px; 
+            border: none;
+            border-radius: 12px; 
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            cursor: pointer;
+            transition: all 0.3s ease; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            width: 50%;
+        }
+    
+        .btn-eliminar:hover { 
+            background-color: #f5c6cb;
+            transform: translateY(-3px); 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1); 
+        }
+
+        .btn-modificar {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            background-color: #e2f0fe;
+            color: #185abc;
+            width: 50%;
+        }
+
+        .btn-modificar:hover {
+            background-color: #cfe5ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-cancelar {
+            background-color: #6c757d !important;
+            margin-top: 10px;
+        }
+
+        /* --- AVATAR DEL PANEL LATERAL --- */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden; 
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar">     
+            <div class="logo-container"><img src="../Esteticos/logo.png" alt="Logo Nova"></div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="../ver ventas/ver_ventas.html" class="nav-item">📋 Historial de Ventas</a>
+                <a href="../Inventarios/inventarios.html" class="nav-item">📦 Inventarios</a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+            </nav>
+            <div class="logout-container"><a href="../index.html" class="btn-logout" style="text-decoration: none;" onclick="localStorage.clear();">🚪 Salir</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-card">    
+                <div class="title" id="tituloModulo">👤 Gestión de Usuarios</div> 
+                
+                <form id="formRegistroSide" enctype="multipart/form-data">
+                    <input type="hidden" name="id_usuario" id="idUsuarioHidden" value="">
+
+                    <div class="input-box">
+                        <label>Nombre Completo</label>
+                        <input type="text" name="nombre_completo" id="inputNombre" required placeholder="Ej: Damaris Lizeth Venegas">
+                    </div>
+                    <div class="input-box">
+                        <label>Usuario</label>
+                        <input type="text" name="nombre_usuario" id="inputUsuario" required placeholder="Ej: LizethV">
+                    </div>
+                    <div class="input-box">
+                        <label>Contraseña</label>
+                        <input type="password" name="contraseña_usuario" id="inputPass" placeholder="Dejar en blanco para no cambiar si edita">
+                    </div>
+                    <div class="input-box">
+                        <label>Cargo / Rol</label>
+                        <select name="rol" id="selectRol">
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Vendedor">Vendedor</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-box">
+                        <label>Foto de Perfil</label>
+                        <input type="file" id="inputFoto" name="foto_usuario" accept=".jpg, .jpeg, .png, .gif, .webp, image/jpeg, image/png, image/gif, image/webp">
+                        
+                        <div class="preview-container">
+                            <img id="imgPreview" class="image-preview" src="#" alt="Previsualización">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="btnGuardar" class="btn cobrar" style="width: 100%;">Guardar en Base de Datos</button>
+                    <button type="button" id="btnCancelarEdicion" class="btn cobrar btn-cancelar" style="width: 100%; display: none;">❌ Cancelar Edición</button>
+                </form>
+
+                <div id="respuestaRegistro"></div>
+
+                <div class="seccion-eliminar">
+                    <div class="input-box">
+                        <label>Seleccionar usuario para gestionar:</label>
+                        <select id="listaUsuarios">
+                            <option value="">Cargando usuarios...</option>
+                        </select>
+                    </div>
+                    <div class="acciones-grupo">
+                        <button type="button" id="btnModificar" class="btn-modificar">✏️ Modificar</button>
+                        <button type="button" id="btnEliminar" class="btn-eliminar">❌ Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById('formRegistroSide');
+            const respuesta = document.getElementById('respuestaRegistro');
+            const selectUsuarios = document.getElementById('listaUsuarios');
+            const btnGuardar = document.getElementById('btnGuardar');
+            const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
+            const tituloModulo = document.getElementById('tituloModulo');
+            const avatarContenedor = document.getElementById('avatar-contenedor');
+            
+            const inputFoto = document.getElementById('inputFoto');
+            const imgPreview = document.getElementById('imgPreview');
+            const idUsuarioHidden = document.getElementById('idUsuarioHidden');
+
+            // Arreglo global temporal para guardar la lista descargada y buscar rápido al editar
+            let usuariosCache = [];
+
+            // 1. Datos de sesión lateral
+            const nombreUser = localStorage.getItem("usuarioLogueado");
+            const cargoUser = localStorage.getItem("cargoUsuario");
+
+            if (document.getElementById("nombre-perfil")) document.getElementById("nombre-perfil").textContent = nombreUser || "Usuario";
+            if (document.getElementById("rol-perfil")) document.getElementById("rol-perfil").textContent = (cargoUser || "SIN CARGO").toUpperCase();
+
+            if (nombreUser && nombreUser.trim() !== "") {
+               avatarContenedor.innerHTML = `
+                   <img src="foto/${nombreUser}.jpg" 
+                        onerror="this.src='foto/${nombreUser}.png'; 
+                                 this.onerror=function(){ this.src='foto/${nombreUser}.webp'; 
+                                 this.onerror=function(){ this.src='foto/${nombreUser}.gif'; 
+                                 this.onerror=function(){ this.src='foto/${nombreUser}.jpeg'; 
+                                 this.onerror=function(){ this.parentElement.innerHTML='${nombreUser.charAt(0).toUpperCase()}'; }; }; }; };" 
+                        alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            // 2. Control de accesos Vendedor
+            if (cargoUser === "Vendedor") {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    if (!item.href.includes("dashboard.html")) item.style.display = "none";
+                });       
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="content-card">
+                            <h2>Bienvenida, ${nombreUser || 'Usuario'}</h2>
+                            <p>Tu cargo actual es <b>${cargoUser}</b>. No tienes permisos para acceder a los módulos de gestión.</p>
+                        </div>`;
+                }
+                return; 
+            }
+
+            // 3. Previsualización de Imagen
+            inputFoto.addEventListener('change', function() {
+                const archivo = this.files[0];
+                if (archivo) {
+                    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!tiposPermitidos.includes(archivo.type)) {
+                        alert("❌ Formato no válido. Selecciona una imagen JPG, JPEG, PNG, GIF o WEBP.");
+                        this.value = '';
+                        imgPreview.src = '#';
+                        imgPreview.style.display = 'none';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(archivo);
+                } else {
+                    if(!idUsuarioHidden.value) { // Solo limpia si no estamos editando
+                        imgPreview.src = '#';
+                        imgPreview.style.display = 'none';
+                    }
+                }
+            });
+
+            // 4. Cargar usuarios del servidor
+            async function cargarUsuarios() {
+                try {
+                    const res = await fetch('obtener_usuarios.php');
+                    const usuarios = await res.json();
+                    selectUsuarios.innerHTML = '<option value="">Selecciona un usuario...</option>';
+                    
+                    if (Array.isArray(usuarios)) {
+                        usuariosCache = usuarios; // Almacenamos en caché local
+                        usuarios.forEach(u => {
+                            const opt = document.createElement('option');
+                            opt.value = u.id_usuario;
+                            opt.textContent = `${u.nombre_completo} (@${u.nombre_usuario}) - ${u.rol}`;
+                            selectUsuarios.appendChild(opt);
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                    selectUsuarios.innerHTML = '<option value="">Error al conectar con el servidor</option>';
+                }
+            }
+
+            // 5. EVENTO MODIFICAR: Cargar datos seleccionados en el formulario
+            document.getElementById('btnModificar').addEventListener('click', () => {
+                const idSeleccionado = selectUsuarios.value;
+                if (!idSeleccionado) return alert("Por favor, selecciona un usuario de la lista.");
+
+                const usuario = usuariosCache.find(u => u.id_usuario == idSeleccionado);
+                if (!usuario) return alert("No se encontraron los datos del usuario.");
+
+                // Rellenar inputs
+                idUsuarioHidden.value = usuario.id_usuario;
+                document.getElementById('inputNombre').value = usuario.nombre_completo;
+                document.getElementById('inputUsuario').value = usuario.nombre_usuario;
+                document.getElementById('selectRol').value = usuario.rol;
+                
+                // La contraseña no es obligatoria al editar para no reescribirla por accidente
+                document.getElementById('inputPass').required = false;
+                document.getElementById('inputPass').placeholder = "Escribe una nueva contraseña si deseas cambiarla";
+
+                // Forzar visualización de su foto actual si existe en base a su username
+                imgPreview.src = `foto/${usuario.nombre_usuario}.jpg`;
+                imgPreview.style.display = 'block';
+                // Evitar error inmediato si no tiene foto mapeando un fallback sencillo
+                imgPreview.onerror = function() { this.style.display = 'none'; };
+
+                // Cambiar el estado visual a modo Edición
+                tituloModulo.textContent = "✏️ Modificar Usuario";
+                btnGuardar.textContent = "Actualizar en Base de Datos";
+                btnCancelarEdicion.style.display = "block";
+                
+                // Hacer scroll suave hacia arriba al formulario
+                form.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Función para salir del modo edición y resetear todo de forma limpia
+            function resetearFormulario() {
+                form.reset();
+                idUsuarioHidden.value = "";
+                document.getElementById('inputPass').required = true;
+                document.getElementById('inputPass').placeholder = "";
+                imgPreview.src = '#';
+                imgPreview.style.display = 'none';
+                
+                tituloModulo.textContent = "👤 Gestión de Usuarios";
+                btnGuardar.textContent = "Guardar en Base de Datos";
+                btnCancelarEdicion.style.display = "none";
+            }
+
+            btnCancelarEdicion.addEventListener('click', resetearFormulario);
+
+            // 6. Enviar Formulario (Registrar o Actualizar según corresponda)
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                btnGuardar.disabled = true;
+                const textoOriginalBtn = btnGuardar.textContent;
+                btnGuardar.textContent = "⌛ Procesando...";
+                respuesta.style.display = "none";
+
+                const formData = new FormData(form);
+                
+                // Si el ID oculto tiene valor, mandamos a actualizar_usuario.php, si no, a procesar_registro.php
+                const urlDestino = idUsuarioHidden.value ? 'actualizar_usuario.php' : 'procesar_registro.php';
+
+                try {
+                    const response = await fetch(urlDestino, { method: 'POST', body: formData });
+                    const data = await response.json();
+
+                    respuesta.style.display = "block";
+                    if (data.status === "success") {
+                        respuesta.style.backgroundColor = "#d4edda";
+                        respuesta.style.color = "#155724";
+                        respuesta.textContent = idUsuarioHidden.value 
+                            ? "✅ ¡Usuario actualizado exitosamente!" 
+                            : "✅ ¡Usuario registrado exitosamente!";
+                        
+                        resetearFormulario();
+                        cargarUsuarios(); 
+                    } else {
+                        respuesta.style.backgroundColor = "#f8d7da";
+                        respuesta.style.color = "#721c24";
+                        respuesta.textContent = "❌ Error: " + data.message;
+                    }
+                } catch (error) {
+                     respuesta.style.display = "block";
+                     respuesta.style.backgroundColor = "#f8d7da";
+                     respuesta.style.color = "#721c24";
+                     respuesta.textContent = "❌ Error en el servidor o formato inválido.";
+                } finally {
+                    btnGuardar.disabled = false;
+                    btnGuardar.textContent = idUsuarioHidden.value ? "Actualizar en Base de Datos" : "Guardar en Base de Datos";
+                }
+            });
+
+            // 7. Eliminar Usuarios
+            document.getElementById('btnEliminar').addEventListener('click', async () => {
+                const idSeleccionado = selectUsuarios.value;
+                if (!idSeleccionado) return alert("Por favor, selecciona un usuario para eliminar.");
+
+                if (confirm("¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.")) {
+                    try {
+                        const response = await fetch('eliminar_usuario.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `id_usuario=${idSeleccionado}`
+                        });
+                        const data = await response.json();
+                        if (data.status === "success") {
+                            alert("🗑️ Usuario eliminado exitosamente.");
+                            if(idUsuarioHidden.value === idSeleccionado) {
+                                resetearFormulario();
+                            }
+                            cargarUsuarios();
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    } catch (e) { alert("Error al conectar con el servidor."); }
+                }
+            });
+
+            // Inicializar lista al cargar
+            cargarUsuarios();
+        });
+    </script>
+</body>
+</html>

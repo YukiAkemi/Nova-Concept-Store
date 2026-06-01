@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Venta - Nova Concept Store</title>
+    <link rel="stylesheet" href="../Esteticos/estilos_dashboard.css">
+    <link rel="stylesheet" href="../ventas/ventas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .main-content { margin-left: 16.5%; width: calc(100% - 280px); padding: 40px; background-color: #f9f9f9; display: flex; flex-direction: column; gap: 30px; }
+        .pedido-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; box-sizing: border-box;}
+        
+        .btn-logout {
+            width: 100%; background-color: #ffffff; border: 1px solid #ebd1d9; padding: 15px;
+            border-radius: 10px; font-size: 15px; font-weight: bold; color: #333; display: flex; justify-content: center; align-items: center; gap: 10px;
+            text-decoration: none; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn-logout:hover { background-color: #fdf5f7; }
+
+        /* Estilos del Avatar Circular de la Sidebar */
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #c49fa7;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .recibo-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+        .recibo-tabla { width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #333; }
+        .recibo-tabla th { background: #fce4ec; border: 1px solid #333; padding: 12px; font-weight: bold; text-align: center; }
+        .recibo-tabla td { border: 1px solid #333; padding: 12px; text-align: center; }
+        .totales-recibo { background: #fce4ec; padding: 15px; border-radius: 8px; min-width: 150px; text-align: center; border: 1px solid #333; }
+        
+        .btn-guardar { background: #7f8c8d; color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 20px; transition: all 0.2s; }
+        .btn-guardar:hover { transform: translateY(-2px); opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">  
+        <aside class="sidebar" style="display: flex; flex-direction: column; height: 100vh; position: fixed;">     
+            <div class="logo-container"><img src="../Esteticos/logo.png" alt="Nova"></div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar-contenedor">
+                    <span id="avatar-letra">U</span>
+                </div>
+                <div class="user-info">
+                  <p class="user-name" id="nombre-perfil">Cargando...</p>
+                  <p class="user-role" id="rol-perfil">SUPERADMIN</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="../ventas/Ventas.html" class="nav-item">💰 Ventas</a>
+                <a href="ver_ventas.html" class="nav-item active">📋 Historial de Ventas</a>
+                <a href="../Inventarios/inventarios.html" class="nav-item">📦 Inventarios</a>
+                <a href="../Emprendedores/Emprendedores.html" class="nav-item">🚀 Emprendedores</a>
+                <a href="../Usuario/Usuarios.html" class="nav-item">👤 Usuarios</a>
+            </nav>
+            <div class="logout-container">
+                <a href="../index.html" class="btn-logout" onclick="localStorage.clear();"><span>🚪 Salir</span></a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="pedido-card">
+                <div class="recibo-header">
+                    <div>
+                        <h1 style="font-size: 45px; margin:0; font-family: serif; letter-spacing: 1px;">DETALLE DE VENTA</h1>
+                        <p style="margin: 5px 0;"><strong>FOLIO / ID:</strong> <span id="det-id">Cargando...</span></p>
+                        <p style="margin: 5px 0;"><strong>FECHA:</strong> <span id="det-fecha">...</span></p>
+                    </div>
+                    <img src="../Esteticos/logo.png" width="160">
+                </div>
+                
+                <div style="display:flex; gap:30px; margin-bottom:15px; font-size:14px; background:#f9f9f9; padding:15px; border-radius:8px;">
+                    <p style="margin:0;"><strong>Método de Pago:</strong> <span id="det-metodo">...</span></p>
+                    <p style="margin:0;"><strong>Tipo de Pago:</strong> <span id="det-tipo-pago">...</span></p>
+                    <p style="margin:0;"><strong>Comprobante:</strong> <span id="det-comprobante">...</span></p>
+                </div>
+
+                <table class="recibo-tabla">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">PRODUCTO</th>
+                            <th>CANTIDAD</th>
+                            <th>PRECIO UNITARIO</th>
+                            <th>DESCUENTO LÍNEA</th>
+                            <th>SUBTOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="det-productos-cuerpo">
+                        <tr><td colspan="5" style="text-align:center;">Buscando información de los artículos...</td></tr>
+                    </tbody>
+                </table>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px;">
+                    <div style="border: 1px solid #333; padding:15px; width: 55%; border-radius:5px; font-size:14px; line-height: 1.6;">
+                        <strong>Información de Relación:</strong><br>
+                        ID Cliente: <span id="det-cliente">...</span><br>
+                        ID Usuario (Vendedor): <span id="det-usuario">...</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <div style="font-size: 14px; text-align:right;">Subtotal Gral: <span id="det-subtotal-gral">...</span></div>
+                        <div style="font-size: 14px; text-align:right; color:red;">Descuento Gral: -<span id="det-descuento-gral">...</span></div>
+                        <div class="totales-recibo">
+                            <span style="font-size: 13px; font-weight:bold;">TOTAL NETO</span><br>
+                            <strong id="det-total-final" style="font-size: 26px;">...</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button class="btn-guardar" onclick="window.location.href='ver_ventas.html'">⬅️ VOLVER AL HISTORIAL</button>
+                    <button class="btn-guardar" style="background:#2ecc71;" onclick="window.print()">🖨️ IMPRIMIR DETALLE</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Cargar datos del perfil lateral de forma síncrona
+            const nombreUser = localStorage.getItem("usuarioLogueado") || "Usuario";
+            const cargoUser = localStorage.getItem("cargoUsuario") || "Sin Cargo";
+            const avatarContenedor = document.getElementById('avatar-contenedor');
+
+            document.getElementById("nombre-perfil").textContent = nombreUser;
+            document.getElementById("rol-perfil").textContent = cargoUser.toUpperCase();
+
+            // Cadena secuencial de imágenes idéntica a tu módulo de usuarios
+            if (nombreUser !== "Usuario") {
+                avatarContenedor.innerHTML = `
+                    <img src="../Usuario/foto/${nombreUser}.jpg" 
+                        onerror="this.src='../Usuario/foto/${nombreUser}.png'; 
+                                 this.onerror=function(){ this.src='../Usuario/foto/${nombreUser}.webp'; 
+                                 this.onerror=function(){ this.src='../Usuario/foto/${nombreUser}.gif'; 
+                                 this.onerror=function(){ this.src='../Usuario/foto/${nombreUser}.jpeg'; 
+                                 this.onerror=function(){ this.parentElement.innerHTML='${nombreUser.charAt(0).toUpperCase()}'; }; }; }; };" 
+                        alt="Avatar">`;
+            } else {
+                avatarContenedor.innerHTML = `<span id="avatar-letra">U</span>`;
+            }
+
+            // 2. Control estricto de accesos por Rol de Vendedor
+            if (cargoUser === "Vendedor") {
+                const itemsMenu = document.querySelectorAll('.nav-item');
+                itemsMenu.forEach(item => {
+                    if (!item.href.includes("privera_vista.html")) {
+                        item.style.display = "none";
+                    }
+                });       
+                
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="pedido-card">
+                            <h2>Bienvenida, ${nombreUser}</h2>
+                            <p>Tu cargo actual es <b>${cargoUser}</b>. No tienes permisos para acceder a los módulos de gestión.</p>
+                        </div>`;
+                }
+                return; 
+            }
+
+            // 3. Obtener parámetro id_venta de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const idVenta = urlParams.get('id_venta');
+
+            if (!idVenta) {
+                alert("Error: No se proporcionó un ID de venta válido.");
+                window.location.href = 'ver_ventas.html';
+                return;
+            }
+
+            // 4. PETICIÓN BASE DE DATOS: Encabezado general del ticket
+            fetch(`obtener_ventas.php?accion=obtener_venta&id_venta=${idVenta}`)
+                .then(res => res.json())
+                .then(venta => {
+                    if (!venta || venta.error) {
+                        alert("La venta solicitada no existe en la base de datos.");
+                        window.location.href = 'ver_ventas.html';
+                        return;
+                    }
+                    document.getElementById("det-id").textContent = venta.id_venta;
+                    document.getElementById("det-fecha").textContent = venta.fecha;
+                    document.getElementById("det-metodo").textContent = venta.metodo_pago;
+                    document.getElementById("det-tipo-pago").textContent = venta.tipo_pago;
+                    document.getElementById("det-comprobante").textContent = venta.comprobante;
+                    document.getElementById("det-cliente").textContent = venta.id_cliente;
+                    document.getElementById("det-usuario").textContent = venta.id_usuario;
+                    
+                    document.getElementById("det-subtotal-gral").textContent = "$" + parseFloat(venta.subtotal).toFixed(2);
+                    document.getElementById("det-descuento-gral").textContent = "$" + parseFloat(venta.descuento).toFixed(2);
+                    document.getElementById("det-total-final").textContent = "$" + parseFloat(venta.total).toFixed(2);
+                })
+                .catch(err => console.error("Error al conectar cabecera con base de datos:", err));
+
+            // 5. PETICIÓN BASE DE DATOS: Artículos de la venta (Con nombres desde INNER JOIN)
+            fetch(`obtener_ventas.php?accion=detalle&id_venta=${idVenta}`)
+                .then(res => res.json())
+                .then(productos => {
+                    const cuerpoDetalle = document.getElementById("det-productos-cuerpo");
+                    cuerpoDetalle.innerHTML = "";
+
+                    if (productos.length === 0) {
+                        cuerpoDetalle.innerHTML = "<tr><td colspan='5'>Esta venta no contiene artículos registrados.</td></tr>";
+                        return;
+                    }
+
+                    productos.forEach(prod => {
+                        const cant = parseFloat(prod.cantidad);
+                        const prec = parseFloat(prod.precio_unitario);
+                        const desc = parseFloat(prod.descuento_linea);
+                        const subtotalArticulo = (cant * prec) - desc;
+                        
+                        const nombreAMostrar = prod.nombre_producto ? prod.nombre_producto : `Producto ID #${prod.id_producto}`;
+
+                        cuerpoDetalle.innerHTML += `
+                            <tr>
+                                <td style="text-align: left; font-weight: 600;">${nombreAMostrar}</td>
+                                <td>${cant}</td>
+                                <td>$${prec.toFixed(2)}</td>
+                                <td>$${desc.toFixed(2)}</td>
+                                <td style="font-weight: bold;">$${subtotalArticulo.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    console.error("Error al cargar productos:", err);
+                    document.getElementById("det-productos-cuerpo").innerHTML = "<tr><td colspan='5' style='color:red;'>Error de red al cargar productos.</td></tr>";
+                });
+        });
+    </script>
+</body>
+</html>
